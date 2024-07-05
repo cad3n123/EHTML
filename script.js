@@ -1,7 +1,6 @@
 // Global Constants
 const [ $form ] = [ 'form' ].map(selector => document.querySelector(selector));
-const [ $textBoxes ] = [ 'text-boxes' ].map(id => document.getElementById(id));
-const [ $textEditor, $console ] = [ 'textarea', 'p' ].map(selector => $textBoxes.querySelector(selector));
+const [ $textBoxes, $textEditor, $console ] = [ 'text-boxes', 'text-editor', 'console' ].map(id => document.getElementById(id));
 
 // Global Variables
 
@@ -52,11 +51,17 @@ const NodeType = {
     FUNCTION_CALL: 4,
     STRING: 5,
     NUMBER: 6,
-    BOOLEAN: 7
+    BOOLEAN: 7,
+    FUNCTION: 8
 };
-const NodeTypeString = ['Null', 'Token', 'Literal', 'Identifier', 'Function Call', 'String', 'Number', 'Boolean'];
+const NodeTypeString = ['Null', 'Token', 'Literal', 'Identifier', 'Function Call', 'String', 'Number', 'Boolean', 'Function'];
 /**
- * @typedef {Token|string|number|boolean} NodeValue1
+ * @typedef {Object} MyFunction
+ * @property {Array.<MyNode>} statementNodes
+ * @property {Scope} scope
+ */
+/**
+ * @typedef {Token|MyFunction|string|number|boolean} NodeValue1
  */
 /**
  * @typedef {Array.<MyNode>|null} NodeValue2
@@ -81,10 +86,67 @@ function newNode(nodeType, value1, value2) {
         value2: value2
     }
 }
+/**
+ * 
+ * @returns {HTMLParagraphElement}
+ */
+function newCarrot() {
+    const p = document.createElement('p');
+    p.class = 'carrot';
+    p.innerHTML = '>'
+    return p;
+};
+function newConsoleLine() {
+    const $div = document.createElement('div');
+    $div.classList.add('line');
+    return $div;
+}
 
 // Functions
+function main() {
+}
+/**
+ * @param {string} text
+ */
+function addToConsole(text) {
+    const $line = newConsoleLine();
+    const $text = document.createElement('p');
+    $text.innerHTML = text;
+    $line.appendChild(newCarrot());
+    $line.appendChild($text);
+    $console.appendChild($line);
+}
+/**
+ * 
+ * @returns {Promise<string>}
+ */
+async function getConsoleInput() {
+    const $line = newConsoleLine();
+    $line.classList.add('input');
+    const $textarea = document.createElement('textarea');
+    $line.appendChild(newCarrot());
+    $line.appendChild($textarea);
+    $console.appendChild($line);
+
+    const promise = new Promise((resolve) => {
+        $textarea.addEventListener('keydown', (event) => {
+            if (event.key == 'Enter') {
+                const text = $textarea.value;
+                const $text = document.createElement('p');
+                $text.innerHTML = text;
+                $line.appendChild($text);
+                $textarea.remove();
+                $line.classList.remove('input');
+                resolve(text);
+            }
+        });
+    })
+    
+    return promise;
+}
 
 // Event Listeners
+window.addEventListener('load', main);
 $textEditor.addEventListener('keydown', (event) => {
     if (event.key == 'Tab') {
         event.preventDefault();
@@ -291,9 +353,8 @@ $form.addEventListener('submit', (event) => {
     globalNodes.forEach(token => console.log(token));
 
     // Run
-    (() => {
+    (async () => {
         $console.innerHTML = '';
-        let anonymousFunctionCount = 0;
         /**
          * @typedef {Object} Variable
          * @property {string} identifier
@@ -312,42 +373,50 @@ $form.addEventListener('submit', (event) => {
             }
         }
         /**
-         * @typedef {Object} MyFunction
-         * @property {string} identifier
-         * @property {Array.<MyNode>} statementNodes
-         * @property {Array.<Variable} localVariables
-         * @property {Array.<MyFunction} localFunctions
+         * @typedef {Object} Scope
+         * @property {Array.<Variable>} variables
+         * @property {Scope|null} parentScope
          */
+        /**
+         * 
+         * @param {Scope} [parentScope=null]
+         * @param {Array.<Variable} [variables=EmptyArray]
+         * @returns {Scope}
+         */
+        function newScope(parentScope, variables) {
+            if (!variables) {
+                variables = [];
+            }
+            if (!parentScope) {
+                parentScope = null;
+            }
+            return {
+                variables: variables,
+                parentScope: parentScope
+            }
+        }
+        let globalScope = newScope();
         /**
          * 
          * @param {string} identifier 
          * @param {Array.<MyNode>} statementNodes 
-         * @param {Array.<Variable>} localVariables 
-         * @param {Array.<MyFunction} localFunctions 
+         * @param {Scope} scope
          * @returns {MyFunction}
          */
-        function newFunction(identifier, statementNodes, localVariables, localFunctions) {
+        function newFunction(statementNodes, scope) {
             return {
-                identifier: identifier,
                 statementNodes: statementNodes,
-                localVariables: localVariables,
-                localFunctions: localFunctions
+                scope: scope
             }
         }
-        /**
-         * @typedef {Object} RunFunctionReturnValue
-         * @property {Array.<Variable>} updatedLocalVariables
-         * @property {Array.<Function>} updatedLocalFunctions
-         * @property {MyNode|null} returnValue
-         */
         /**
          * 
          * @param {MyFunction} thisFunction
          * @param {Array.<MyNode>} [params=[]] 
          * @param {boolean} [isGlobal=false]
-         * @returns {RunFunctionReturnValue}
+         * @returns {Promise.<MyNode|null>}
          */
-        function runFunction(thisFunction, params, isGlobal) {
+        async function runFunction(thisFunction, params, isGlobal) {
             if (!isGlobal) {
                 isGlobal = false;
             }
@@ -355,43 +424,25 @@ $form.addEventListener('submit', (event) => {
                 params = [];
             }
             const statementNodes = thisFunction.statementNodes;
-            let localVariables = thisFunction.localVariables;
-            let localFunctions = thisFunction.localFunctions;
-            let variables = /** @type {Array.<Variable} */([]);
-            let functions = /** @type {Array.<MyFunction} */([]);
+            let scope = thisFunction.scope;
             /**
              * 
-             * @param {MyNode} [value=null] 
-             * @returns {RunFunctionReturnValue}
+             * @param {MyNode} functionNode 
+             * @returns {MyFunction}
              */
-            function newRunFunctionReturnValue(value) {
-                if (!value) {
-                    value = null;
-                }
-                return {
-                    updatedLocalVariables: localVariables,
-                    updatedLocalFunctions: localFunctions,
-                    returnValue: value
-                }
+            function builtInFunctionFunction(functionNode) {
+                return newFunction(functionNode.value2, newScope(scope));
             }
-            /**
-             * 
-             * @param {RunFunctionReturnValue} returnValue 
-             */
-            function updateAfterRunningFunction(returnValue) {
-                if (returnValue) {
-                    const updatedVariables = returnValue.updatedLocalVariables;
-                    const updatedFunctions = returnValue.updatedLocalFunctions;
-                    variables = updatedVariables.slice(0, variables.length);
-                    localFunctions = updatedVariables.slice(variables.length);
-                    functions = updatedFunctions.slice(0, functions.length);
-                    localFunctions = updatedFunctions.slice(functions.length);
-                }
-            }
+            const builtInVariables = (() => {
+                return [
+                    newVariable('true', newNode(NodeType.BOOLEAN, true)),
+                    newVariable('false', newNode(NodeType.BOOLEAN, false))
+                ]
+            })();
             /**
              * @callback BuiltInFunctionRun
              * @param {Array.<MyNode>} parameters
-             * @returns {MyNode|null}
+             * @returns {Promise.<MyNode|null>}
              */
             /**
              * @typedef {Object} BuiltInFunction
@@ -403,10 +454,10 @@ $form.addEventListener('submit', (event) => {
                 /**
                  * 
                  * @param {MyNode} parameter
-                 * @returns {MyNode}
+                 * @returns {Promise.<MyNode>}
                  */
-                function builtInToString(parameter) {
-                    const parameterValue = getParameterValues([parameter])[0];
+                async function builtInToString(parameter) {
+                    const parameterValue = await getParameterValue(parameter, scope);
                     if (parameterValue.type == NodeType.STRING) {
                         return parameterValue;
                     }
@@ -427,10 +478,10 @@ $form.addEventListener('submit', (event) => {
                 /**
                  * 
                  * @param {MyNode} parameters 
-                 * @returns {MyNode}
+                 * @returns {Promise.<MyNode>}
                  */
-                function builtInToNumber(parameters) {
-                    const parameterValue = getParameterValues([parameters])[0];
+                async function builtInToNumber(parameters) {
+                    const parameterValue = await getParameterValue(parameters, scope);
                     if (parameterValue.type == NodeType.NUMBER) {
                         return parameterValue;
                     }
@@ -449,10 +500,10 @@ $form.addEventListener('submit', (event) => {
                 /**
                  * 
                  * @param {MyNode} parameter
-                 * @returns {MyNode} 
+                 * @returns {Promise.<MyNode>} 
                  */
-                function builtInToBoolean(parameter) {
-                    const parameterValue = getParameterValues([parameter])[0];
+                async function builtInToBoolean(parameter) {
+                    const parameterValue = await getParameterValues(parameter, scope);
                     if (parameterValue.type == NodeType.BOOLEAN) {
                         return parameterValue;
                     }
@@ -474,7 +525,7 @@ $form.addEventListener('submit', (event) => {
                 return /** @type {Array.<BuiltInFunction>} */([
                     {
                         identifier: 'set',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'set' expects 2 parameters but received ${parameters.length}.`);
                                 return;
@@ -487,10 +538,10 @@ $form.addEventListener('submit', (event) => {
                             const value = parameters[1];
                             if (value.type == NodeType.FUNCTION_CALL) {
                                 if (value.value1 === 'function') {
-                                    setFunction(identifier, value.value2);
+                                    setVariable(identifier, newNode(NodeType.FUNCTION, builtInFunctionFunction(value)));
                                     return;
                                 }
-                                const returnValue = callFunction(value);
+                                const returnValue = await callFunction(value, scope);
                                 if (returnValue != null) {
                                     setVariable(identifier, returnValue)
                                     return;
@@ -499,10 +550,11 @@ $form.addEventListener('submit', (event) => {
                                 return;
                             }
                             if (value.type == NodeType.IDENTIFIER) {
-                                setVariable(identifier, getVariable(value));
+                                const otherVariable = getVariable(value);
+                                setVariable(identifier, otherVariable.type, otherVariable.value);
                                 return;
                             }
-                            if (value.type == NodeType.LITERAL || value.type == NodeType.STRING || value.type == NodeType.NUMBER || value.type == NodeType.BOOLEAN) {
+                            if (value.type == NodeType.LITERAL || value.type == NodeType.STRING || value.type == NodeType.NUMBER || value.type == NodeType.BOOLEAN || value.type == NodeType.FUNCTION) {
                                 setVariable(identifier, value);
                                 return;
                             }
@@ -511,17 +563,28 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'print',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 1) {
                                 console.error(`'print' expects 1 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const parameter = builtInToString(getParameterValues(parameters)[0]);
+                            const parameter = await builtInToString(await getParameterValue(parameters[0], scope));
                             if (parameter.type == NodeType.STRING) {
-                                $console.innerHTML += parameter.value1 + '<br>';
+                                addToConsole(parameter.value1);
                                 return;
                             }
                             console.error(`'print' expects a string but was given a ${NodeTypeString[parameter.type]}.`)
+                        }
+                    },
+                    {
+                        identifier: 'input',
+                        run: async (parameters) => {
+                            if (parameters.length != 0) {
+                                console.error(`'input' expects 0 parameters but received ${parameters.length}.`);
+                                return;
+                            }
+                            const input = await getConsoleInput();
+                            return newNode(NodeType.STRING, input);
                         }
                     },
                     {
@@ -531,54 +594,58 @@ $form.addEventListener('submit', (event) => {
                                 console.error(`Expected ${parameters.length} parameters but was given ${params.length}.`);
                                 return;
                             }
-                            parameters.forEach((parameter, i) => setVariable(parameter.value1, params[i]));
+                            parameters.forEach((parameter, i) => {
+                                setVariable(
+                                parameter.value1,
+                                getParameterValue(params[i])
+                            )});
                         }
                     },
                     {
                         identifier: 'string',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 1) {
                                 console.error(`'string' expects 1 parameter but was given ${parameters.length}.`);
                             }
-                            return builtInToString(parameters[0]);
+                            return await builtInToString(parameters[0]);
                         }
                     },
                     {
                         identifier: 'number',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 1) {
                                 console.error(`'number' expects 1 parameter but was given ${parameters.length}.`);
                             }
-                            return builtInToNumber(parameters[0]);
+                            return await builtInToNumber(parameters[0]);
                         }
                     },
                     {
                         identifier: 'boolean',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 1) {
                                 console.error(`'boolean' expects 1 parameter but was given ${parameters.length}.`);
                             }
-                            return builtInToBoolean(parameters[0]);
+                            return await builtInToBoolean(parameters[0]);
                         }
                     },
                     {
                         identifier: 'equal',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'equal' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const parameterValues = getParameterValues(parameters);
+                            const parameterValues = await getParameterValues(parameters, scope);
                             const parameter1 = parameterValues[0];
                             let result;
                             if (parameter1.type == NodeType.STRING || parameter1.type == NodeType.LITERAL) {
-                                const parameter2 = builtInToString(parameterValues[1]);
+                                const parameter2 = await builtInToString(parameterValues[1]);
                                 result = parameter1.value1 === parameter2.value1;
                             } else if (parameter1.type == NodeType.NUMBER) {
-                                const parameter2 = builtInToNumber(parameterValues[1]);
+                                const parameter2 = await builtInToNumber(parameterValues[1]);
                                 result = parameter1.value1 == parameter2.value1;
                             } else if (parameter1.type == NodeType.BOOLEAN) {
-                                const parameter2 = builtInToBoolean(parameterValues[1]);
+                                const parameter2 = await builtInToBoolean(parameterValues[1]);
                                 result = parameter1.value1 == parameter2.value1;
                             } else {
                                 console.error(`Cannot compare ${NodeTypeString[parameter1.type]}.`);
@@ -589,20 +656,20 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'greater',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'greater' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const parameterValues = getParameterValues(parameters);
+                            const parameterValues = await getParameterValues(parameters, scope);
                             const parameter1 = parameterValues[0];
                             let parameter2;
                             if (parameter1.type == NodeType.STRING || parameter1.type == NodeType.LITERAL) {
-                                parameter2 = builtInToString(parameterValues[1]);
+                                parameter2 = await builtInToString(parameterValues[1]);
                             } else if (parameter1.type == NodeType.NUMBER) {
-                                parameter2 = builtInToNumber(parameterValues[1]);
+                                parameter2 = await builtInToNumber(parameterValues[1]);
                             } else if (parameter1.type == NodeType.BOOLEAN) {
-                                parameter2 = builtInToBoolean(parameterValues[1]);
+                                parameter2 = await builtInToBoolean(parameterValues[1]);
                             } else {
                                 console.error(`Cannot compare ${NodeTypeString[parameter1.type]}.`);
                                 return;
@@ -612,20 +679,20 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'less',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'less' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const parameterValues = getParameterValues(parameters);
+                            const parameterValues = await getParameterValues(parameters, scope);
                             const parameter1 = parameterValues[0];
                             let parameter2;
                             if (parameter1.type == NodeType.STRING || parameter1.type == NodeType.LITERAL) {
-                                parameter2 = builtInToString(parameterValues[1]);
+                                parameter2 = await builtInToString(parameterValues[1]);
                             } else if (parameter1.type == NodeType.NUMBER) {
-                                parameter2 = builtInToNumber(parameterValues[1]);
+                                parameter2 = await builtInToNumber(parameterValues[1]);
                             } else if (parameter1.type == NodeType.BOOLEAN) {
-                                parameter2 = builtInToBoolean(parameterValues[1]);
+                                parameter2 = await builtInToBoolean(parameterValues[1]);
                             } else {
                                 console.error(`Cannot compare ${NodeTypeString[parameter1.type]}.`);
                                 return;
@@ -635,12 +702,12 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'and',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'and' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.BOOLEAN || parameter2.type != NodeType.BOOLEAN) {
                                 console.error(`'and' requires both values to be a boolean.`);
                                 return;
@@ -650,12 +717,12 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'or',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'or' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.BOOLEAN || parameter2.type != NodeType.BOOLEAN) {
                                 console.error(`'or' requires both values to be a boolean.`);
                                 return;
@@ -665,12 +732,12 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'add',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'add' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.NUMBER || parameter2.type != NodeType.NUMBER) {
                                 console.error(`'add' requires both values to be a number.`);
                                 return;
@@ -679,13 +746,28 @@ $form.addEventListener('submit', (event) => {
                         }
                     },
                     {
+                        identifier: 'not',
+                        run: async (parameters) => {
+                            if (parameters.length != 1) {
+                                console.error(`'not' expects 1 parameter but received ${parameters.length}.`);
+                                return;
+                            }
+                            const parameter = await getParameterValue(parameters[0], scope);
+                            if (parameter.type == NodeType.BOOLEAN) {
+                                return newNode(NodeType.BOOLEAN, !parameter.value1);
+                            } else {
+                                console.error(`'not' expects a boolean`);
+                            }
+                        }
+                    },
+                    {
                         identifier: 'subtract',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'subtract' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.NUMBER || parameter2.type != NodeType.NUMBER) {
                                 console.error(`'subtract' requires both values to be a number.`);
                                 return;
@@ -695,12 +777,12 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'multiply',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'multiply' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.NUMBER || parameter2.type != NodeType.NUMBER) {
                                 console.error(`'multiply' requires both values to be a number.`);
                                 return;
@@ -710,12 +792,12 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'remainder',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'remainder' expects 2 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const [ parameter1, parameter2 ] = getParameterValues(parameters);
+                            const [ parameter1, parameter2 ] = await getParameterValues(parameters, scope);
                             if (parameter1.type != NodeType.NUMBER || parameter2.type != NodeType.NUMBER) {
                                 console.error(`'remainder' requires both values to be a number.`);
                                 return;
@@ -725,31 +807,46 @@ $form.addEventListener('submit', (event) => {
                     },
                     {
                         identifier: 'if',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 3) {
                                 console.error(`'if' expects 3 parameter but received ${parameters.length}.`);
                                 return;
                             }
-                            const parameter1 = getParameterValues([parameters[0]])[0];
+                            const parameter1 = await getParameterValue(parameters[0], scope);
                             if (parameter1.type != NodeType.BOOLEAN) {
                                 console.error(`The first value of 'if' should be a boolean.`);
                                 return;
                             }
-                            if (parameters[1].type != NodeType.FUNCTION_CALL || parameters[2].type != NodeType.FUNCTION_CALL || parameters[1].value1 !== 'function' || parameters[2].value1 !== 'function') {
-                                console.error(`The second and third value of 'if' should be the function call to 'function'.`);
-                            }
-                            /** @type {Array.<MyNode>} */
-                            let functionToRun = (parameter1.value1) ? parameters[1].value2 : parameters[2].value2;
+                            /** @type {MyFunction} */
+                            const functionToRun = await (async () => {
+                                const parameterToRun = (parameter1.value1) ? parameters[1] : parameters[2];
+                                if (parameterToRun.type == NodeType.FUNCTION_CALL) {
+                                    if (parameterToRun.value1 === 'function') {
+                                        return builtInFunctionFunction(parameterToRun);
+                                    } else {
+                                        const parameterValue = await getParameterValue(parameterToRun, scope);
+                                        if (parameterValue.type == NodeType.FUNCTION) {
+                                            return parameterValue.value1;
+                                        } else {
+                                            console.error(`The second and third value of 'if' should be type function.`);
+                                        }
+                                    }
+                                } else {
+                                    const parameterValue = await getParameterValue(parameterToRun, scope);
+                                    if (parameterValue.type == NodeType.FUNCTION) {
+                                        return parameterValue.value1;
+                                    } else {
+                                        console.error(`The second and third value of 'if' should be type function.`);
+                                    }
+                                }
+                            })();
 
-                            const result = runFunction(newFunction(anonymousFunctionCount.toString(), functionToRun, variables.concat(localVariables)), functions.concat(localFunctions));
-                            anonymousFunctionCount++;
-                            updateAfterRunningFunction(result);
-                            
+                            await runFunction(newFunction(functionToRun.statementNodes, newScope(scope)));
                         }
                     },
                     {
                         identifier: 'while',
-                        run: (parameters) => {
+                        run: async (parameters) => {
                             if (parameters.length != 2) {
                                 console.error(`'while' expects 2 parameter but received ${parameters.length}.`);
                                 return;
@@ -759,26 +856,17 @@ $form.addEventListener('submit', (event) => {
                             if (parameter1.type != NodeType.FUNCTION_CALL || parameter2.type != NodeType.FUNCTION_CALL || parameter1.value1 !== 'function' || parameter2.value1 !== 'function') {
                                 console.error(`Both values of 'while' should be the function call to 'function'.`);
                             }
-                            let innerVariables = variables.concat(thisFunction.localVariables);
-                            let innerFunctions = functions.concat(thisFunction.localFunctions);
                             let loopMax = 10000;
                             let i = 0
                             do {
                                 if (i == loopMax) {
                                     break;
                                 }
-                                let result = runFunction(newFunction(anonymousFunctionCount.toString(), parameter1.value2, innerVariables, innerFunctions));
-                                updateAfterRunningFunction(result);
-
-                                const booleanFunctionResult = result.returnValue;
-                                anonymousFunctionCount++;
+                                const booleanFunctionResult = await runFunction(newFunction(parameter1.value2, scope));
                                 if (!booleanFunctionResult.value1) {
                                     break;
                                 }
-                                result = runFunction(newFunction(anonymousFunctionCount.toString(), parameter2.value2, innerVariables, innerFunctions));
-                                console.log(result);
-                                updateAfterRunningFunction(result);
-                                anonymousFunctionCount++;
+                                await runFunction(newFunction(parameter2.value2, scope));
                                 i++;
                             } while (true)
                             if (i == loopMax) {
@@ -791,99 +879,90 @@ $form.addEventListener('submit', (event) => {
             /**
              * 
              * @param {MyNode} functionNode 
-             * @returns {MyNode|null}
+             * @param {Scope} scope
+             * @returns {Promise.<MyNode|null>}
              */
-            function callFunction(functionNode) {
+            async function callFunction(functionNode, scope) {
                 let builtInFunction = builtInFunctions.find(builtInFunction => builtInFunction.identifier === functionNode.value1);
                 if (builtInFunction != undefined) {
-                    return builtInFunction.run(functionNode.value2);
+                    return await builtInFunction.run(functionNode.value2);
                 }
-                let thisFunction = functions.find(myFunction => myFunction.identifier === functionNode.value1);
-                if (thisFunction != undefined) {
-                    let returnValue = runFunction(thisFunction, getParameterValues(functionNode.value2));
-                    updateAfterRunningFunction(returnValue);
-                    return returnValue.returnValue;
+                let thisFunction = getVariable(functionNode.value1, scope);
+                if (thisFunction) {
+                    if (functionNode.type == NodeType.FUNCTION_CALL) {
+                        return await runFunction(thisFunction.value.value1, await getParameterValues(functionNode.value2, scope));
+                    }
+                } else {
+                    console.error(`Attempting to call unknown function '${functionNode.value1}.`);
                 }
-                let localFunction = localFunctions.find(myFunction => myFunction.identifier === functionNode.value1);
-                if (localFunction != undefined) {
-                    let returnValue = runFunction(localFunction, getParameterValues(functionNode.value2));
-                    updateAfterRunningFunction(returnValue);
-                    return returnValue.returnValue;
-                }
-                console.error(`Attempting to call unknown function '${functionNode.value1}.`);
             }
             /**
              * 
-             * @param {MyNode} variableNode 
-             * @returns {MyNode}
+             * @param {MyNode} parameter
+             * @param {Scope} scope
+             * @returns {Promise.<MyNode>}
              */
-            function getVariable(variableNode) {
-                let variable = variables.find(variable => variable.identifier === variableNode.value1);
-                if (variable != undefined) {
-                    return variable.value;
+            async function getParameterValue(parameter, scope) {
+                switch (parameter.type) {
+                            case NodeType.FUNCTION_CALL:
+                                const functionResult = await callFunction(parameter, scope);
+                                return functionResult
+                            case NodeType.IDENTIFIER:
+                                const variable = getVariable(parameter.value1, scope);
+                                return variable.value;
+                            case NodeType.LITERAL:
+                                const node = newNode(NodeType.STRING, parameter.value1);
+                                return node;
+                            case NodeType.FUNCTION:
+                            case NodeType.STRING:
+                            case NodeType.NUMBER:
+                            case NodeType.BOOLEAN:
+                                return parameter;
+                            default:
+                                console.error(`Error: Unknown parameter ${parameter.value1}.`);
+                                break;
                 }
-                let localVariable = localVariables.find(variable => variable.identifier === variableNode.value1);
-                if (localVariable != undefined) {
-                    return localVariable.value;
-                }
-                console.error(`Attempint to access unknown variable ${variableNode.value1}.`);
             }
             /**
              * 
              * @param {Array.<MyNode>} parameters 
-             * @returns {Array.<MyNode|null>}
+             * @param {Scope} scope
+             * @returns {Promise.<Array.<MyNode>>}
              */
-            function getParameterValues(parameters) {
-                return parameters.map(
-                    /**
-                     * 
-                     * @param {MyNode} parameter 
-                     * @returns {MyNode|null}
-                     */
-                    parameter => {
-                    if (parameter.type == NodeType.FUNCTION_CALL) {
-                        return callFunction(parameter);
-                    } else if (parameter.type == NodeType.IDENTIFIER) {
-                        return getVariable(parameter);
-                    } else if (parameter.type == NodeType.LITERAL) {
-                        return newNode(NodeType.STRING, parameter.value1);
-                    } else if (parameter.type == NodeType.STRING || parameter.type == NodeType.NUMBER || parameter.type == NodeType.BOOLEAN) {
-                        return parameter;
-                    } else {
-                        console.error(`Error: Unknown parameter ${parameter.value1}.`);
-                    }
-                });
+            async function getParameterValues(parameters, scope) {
+                return await Promise.all(parameters.map(parameter => getParameterValue(parameter, scope)));
             }
             /**
              * 
              * @param {string} identifier 
-             * @param {Array.<MyNode>} statementNodes 
-             * @param {Array.<Variable>} localVariables 
-             * @param {Array.<Function>} localFunctions 
+             * @param {Scope} scope 
+             * @returns {Variable|undefined}
              */
-            function setFunction(identifier, statementNodes) {
-                functions.push(newFunction(identifier, statementNodes, variables.concat(localVariables)), functions.concat(localFunctions));
+            function getVariable(identifier, scope) {
+                const existingVariable = scope.variables.find(variable => variable.identifier === identifier);
+                if (existingVariable) {
+                    return existingVariable;
+                }
+                const builtInVariable = builtInVariables.find(variable => variable.identifier === identifier);
+                if (builtInVariable) {
+                    return builtInVariable;
+                }
+                if (scope.parentScope) {
+                    return getVariable(identifier, scope.parentScope);
+                }
+                return undefined;
             }
             /**
              * 
-             * @param {string} identifier 
+             * @param {string} identifier
              * @param {MyNode} value 
              */
             function setVariable(identifier, value) {
-                let existingIndex = variables.findIndex(variable => variable.identifier === identifier);
-                if (existingIndex == -1) {
-                    existingIndex = localVariables.findIndex(variable => variable.identifier === identifier);
-                    if (existingIndex == -1) {
-                        variables.push(newVariable(identifier, value));
-                    } else {
-                        const variable = localVariables[existingIndex];
-                        variable.value = value;
-                        localVariables[existingIndex] = variable;
-                    }
+                let existingVariable = getVariable(identifier, scope);
+                if (existingVariable) {
+                    existingVariable.value = value;
                 } else {
-                    const variable = variables[existingIndex];
-                    variable.value = value;
-                    variables[existingIndex] = variable;
+                    scope.variables.push(newVariable(identifier, value));
                 }
             }
             for (let i = 0; i < statementNodes.length; i++) {
@@ -891,37 +970,35 @@ $form.addEventListener('submit', (event) => {
                 if (statementNode.value1 === 'return') {
                     if (statementNode.value2.length > 1) {
                         console.error(`Return was given ${statementNode.value2.length} values but expects 0 or 1.`);
-                        return newRunFunctionReturnValue();
+                        return;
                     }
                     if (statementNode.value2.length == 1) {
                         const returnNode = statementNode.value2[0];
                         if (returnNode.type == NodeType.FUNCTION_CALL) {
-                            return newRunFunctionReturnValue(callFunction(returnNode));
+                            return await callFunction(returnNode, scope);
                         } else if (returnNode.type == NodeType.IDENTIFIER) {
-                            return newRunFunctionReturnValue(getVariable(returnNode));
-                        } else if (returnNode.type == NodeType.LITERAL) {
-                            return newRunFunctionReturnValue(returnNode);
+                            return getVariable(returnNode.value1, scope).value;
                         } else {
-                            console.error(`Cannot return ${returnNode.type}.`);
+                            return returnNode;
                         }
                     }
                 } else {
-                    callFunction(statementNode);
+                    await callFunction(statementNode, scope);
                 }
             }
 
             if (isGlobal) {
-                const mainFunction = functions.find(myFunction => myFunction.identifier === 'main');
+                const mainFunction = getVariable('main', scope);
                 if (mainFunction != undefined) {
-                    let returnValue = runFunction(mainFunction);
-                    updateAfterRunningFunction(returnValue);
-                    return newRunFunctionReturnValue();
+                    if (mainFunction.value.type == NodeType.FUNCTION) {
+                        return await runFunction(mainFunction.value.value1);
+                    }
                 }
                 console.error(`Cannot find main function.`);
             }
-            return newRunFunctionReturnValue();
+            return;
         }
 
-        runFunction(newFunction('global', globalNodes, [], []), [], true);
+        await runFunction(newFunction(globalNodes, newScope()), [], true);
     })();
 });

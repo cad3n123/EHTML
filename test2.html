@@ -1,0 +1,37 @@
+<set>
+	<number-guessing-game>
+	<function>
+		<params>
+            <answer>
+        </params>
+        <print><string>Enter a number between 1 and 10</string></print>
+        <set>
+            <i>
+            <number><input></input></number>
+        </set>
+        <while>
+            <function>	
+                <return><not><equal>
+                    <i>
+                    <answer>
+                </equal></not></return>
+            </function>
+            <function>
+                <print>You guessed it wrong. Guess again</print>
+                <set>
+                    <i>
+                    <number><input></input></number>
+                </set>
+            </function>
+        </while>
+        <print>You guessed it right</print>
+        <print>Goodbye</print>
+	</function>
+</set>
+
+<set>
+    <main>
+    <function>
+        <number-guessing-game><number>6</number></number-guessing-game>
+    </function>
+</set>

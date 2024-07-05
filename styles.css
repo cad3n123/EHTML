@@ -39,14 +39,14 @@ body {
             height: 100%;
             display: flex;
 
-            textarea {
+            #text-editor {
                 box-sizing: border-box;
                 width: 100%;
                 height: 100%;
                 font-size: large;
                 padding: 0.5rem;
             }
-            p {
+            #console {
                 box-sizing: border-box;
                 width: 100%;
                 height: 100%;
@@ -55,6 +55,36 @@ body {
                 color: white;
                 background-color: black;
                 overflow-y: scroll;
+
+                .line {
+                    display: flex;
+                    margin-bottom: 0.5rem;
+
+                    * {
+                        display: inline-block;
+                        margin: 0 1rem 0 0;
+                    }
+                    textarea {
+                        resize: none;
+                        font-family: unset;
+                        font-size: 15.6px;
+                        box-sizing: border-box;
+                        height: 100%;
+                        width: 100%;
+                        padding: 0;
+                        background-color: black;
+                        color: white;
+                        border-style: none;
+                        outline: none;
+                    }
+                    p {
+                        word-wrap: break-word;
+                        min-width: 0.5rem;
+                    }
+                }
+                .line.input {
+                    height: 100%;
+                }
             }
         }
     }
