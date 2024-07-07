@@ -118,6 +118,7 @@ function addToConsole(text) {
     $line.appendChild(newCarrot());
     $line.appendChild($text);
     $console.appendChild($line);
+    $console.scrollTop = $console.scrollHeight;
 }
 /**
  * 
@@ -130,6 +131,7 @@ async function getConsoleInput() {
     $line.appendChild(newCarrot());
     $line.appendChild($textarea);
     $console.appendChild($line);
+    $console.scrollTop = $console.scrollHeight;
 
     const promise = new Promise((resolve) => {
         $textarea.addEventListener('keydown', (event) => {
@@ -140,6 +142,7 @@ async function getConsoleInput() {
                 $line.appendChild($text);
                 $textarea.remove();
                 $line.classList.remove('input');
+                $console.scrollTop = $console.scrollHeight;
                 resolve(text);
             }
         });
