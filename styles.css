@@ -2,6 +2,9 @@ body {
     margin: 0;
 }
 
+#bmc-wbtn {
+    right: 2rem !important;
+}
 #main {
     box-sizing: border-box;
     height: 100vh;
@@ -16,24 +19,40 @@ body {
         flex-direction: column;
         gap: 1rem;
     
-        button {
-            --size: 2rem;
-
+        nav {
             box-sizing: border-box;
-            width: var(--size);
-            height: var(--size);
-            border-radius: 1rem;
-            text-align: center;
-            border-style: none;
-            margin-left: 1rem;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: lightgray;
-        }
-        button:active {
-            color: rgb(72, 72, 72);
-            background-color: rgb(186, 186, 186);
+            width: 100%;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+
+            .left {
+                justify-self: left;
+                width: max-content;
+
+                button {
+                    --size: 2rem;
+        
+                    box-sizing: border-box;
+                    width: var(--size);
+                    height: var(--size);
+                    border-radius: 1rem;
+                    text-align: center;
+                    border-style: none;
+                    cursor: pointer;
+                }
+                button:hover {
+                    background-color: lightgray;
+                }
+                button:active {
+                    color: rgb(72, 72, 72);
+                    background-color: rgb(186, 186, 186);
+                }
+            }
+            .right {
+                justify-self: right;
+                align-self: flex-end;
+            }
         }
         #text-boxes {
             min-height: 0;
