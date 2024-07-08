@@ -1,111 +1,233 @@
+:root {
+	--off-white: #dcdcaa;
+	--xx-light-orange: #ffcc3f;
+	--x-light-orange: #ffb33f;
+	--light-orange: #ff9a3f;
+	--orange: #ff813f;
+	--dark-orange: #cc6732;
+	--x-dark-orange: #b25a2c;
+
+	tab-size: 4;
+}
+
 body {
-    margin: 0;
+	margin: 0;
 }
 
 #bmc-wbtn {
-    right: 2rem !important;
+	right: 2rem !important;
 }
+
+.no-select {
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Old versions of Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
 #main {
-    box-sizing: border-box;
-    height: 100vh;
-    margin: 0;
-    padding-top: 1rem;
-    background-color: gray;
+	box-sizing: border-box;
+	height: 100vh;
+	margin: 0;
+	padding-top: 1rem;
+	background-color: var(--orange);
+	color: var(--off-white);
 
-    form {
-        height: 100%;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    
-        nav {
-            box-sizing: border-box;
-            width: 100%;
-            padding: 0 1rem;
-            display: flex;
-            flex-direction: column;
+	.content.hidden {
+		display: none;
+	}
+	.content {
+		height: 100%;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 
-            .left {
-                justify-self: left;
-                width: max-content;
+		> nav {
+			box-sizing: border-box;
+			width: 100%;
+			height: 3rem;
+			padding: 0 1rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
 
-                button {
-                    --size: 2rem;
-        
-                    box-sizing: border-box;
-                    width: var(--size);
-                    height: var(--size);
-                    border-radius: 1rem;
-                    text-align: center;
-                    border-style: none;
-                    cursor: pointer;
-                }
-                button:hover {
-                    background-color: lightgray;
-                }
-                button:active {
-                    color: rgb(72, 72, 72);
-                    background-color: rgb(186, 186, 186);
-                }
-            }
-            .right {
-                justify-self: right;
-                align-self: flex-end;
-            }
-        }
-        #text-boxes {
-            min-height: 0;
-            height: 100%;
-            display: flex;
+			.left {
+				justify-self: left;
+				width: max-content;
 
-            #text-editor {
-                box-sizing: border-box;
-                width: 100%;
-                height: 100%;
-                font-size: large;
-                padding: 0.5rem;
-            }
-            #console {
-                box-sizing: border-box;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 1rem;
-                color: white;
-                background-color: black;
-                overflow-y: scroll;
+				button {
+					--size: 2.25rem;
 
-                .line {
-                    display: flex;
-                    margin-bottom: 0.5rem;
+					padding-left: 8px;
+					font-size: x-large;
+					box-sizing: border-box;
+					width: var(--size);
+					height: var(--size);
+					border-radius: 1rem;
+					text-align: center;
+					border-style: none;
+					cursor: pointer;
+					color: var(--x-dark-orange);
+					background-color: var(--light-orange);
+				}
+				button:hover {
+					background-color: var(--x-light-orange);
+				}
+				button:active {
+					opacity: 0.7;
+				}
+			}
+			.right {
+				li {
+					list-style: none;
+					height: max-content;
+					margin: auto;
+					font-size: x-large;
+					cursor: pointer;
+				}
+				li:hover {
+					color: var(--xx-light-orange);
+				}
+				li:active {
+					opacity: 0.7;
+				}
+			}
+		}
+		> div {
+			display: flex;
+			min-height: 0;
+			height: 100%;
+		}
+	}
+	form {
+		#text-boxes {
+			#text-editor {
+				box-sizing: border-box;
+				width: 100%;
+				height: 100%;
+				font-size: large;
+				padding: 0.5rem;
+				padding-bottom: 10rem;
+			}
+			#console {
+				scrollbar-color: grey black;
+				box-sizing: border-box;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 1rem;
+				color: white;
+				background-color: black;
+				overflow-y: scroll;
+				display: flex;
+				flex-direction: column;
 
-                    * {
-                        display: inline-block;
-                        margin: 0 1rem 0 0;
-                    }
-                    textarea {
-                        resize: none;
-                        font-family: unset;
-                        font-size: 15.6px;
-                        box-sizing: border-box;
-                        height: 100%;
-                        width: 100%;
-                        padding: 0;
-                        background-color: black;
-                        color: white;
-                        border-style: none;
-                        outline: none;
-                    }
-                    p {
-                        word-wrap: break-word;
-                        min-width: 0.5rem;
-                    }
-                }
-                .line.input {
-                    height: 100%;
-                }
-            }
-        }
-    }
+				.line {
+					display: flex;
+					margin-bottom: 0.5rem;
+
+					* {
+						display: inline-block;
+						margin: 0 1rem 0 0;
+					}
+					textarea {
+						resize: none;
+						font-family: unset;
+						font-size: 15.6px;
+						box-sizing: border-box;
+						height: 100%;
+						width: 100%;
+						padding: 0;
+						background-color: black;
+						color: white;
+						border-style: none;
+						outline: none;
+					}
+					p {
+						word-wrap: break-word;
+						min-width: 0.5rem;
+					}
+				}
+				.line.input {
+					height: 100%;
+				}
+			}
+		}
+	}
+	#help {
+		> div {
+			background-color: white;
+			color: black;
+
+			#info-side-bar {
+				flex-shrink: 1;
+				box-sizing: border-box;
+				padding-top: 0.5rem;
+				background-color: lightgray;
+				width: max-content;
+
+				p {
+					box-sizing: border-box;
+					background-color: white;
+					padding: 0.25rem 2rem 0.25rem 1rem;
+					margin: 0;
+					min-width: 100%;
+					width: max-content;
+					cursor: pointer;
+					font-size: x-large;
+				}
+				p:hover {
+					background-color: darkgray;
+				}
+				p:active {
+					opacity: 0.7;
+				}
+				p.selected {
+					background-color: var(--orange);
+				}
+			}
+			#info {
+				scrollbar-color: darkgrey rgb(52, 48, 43);
+				flex-grow: 1;
+				background-color: rgb(52, 48, 43);
+				padding: 2rem 2rem 5rem 4rem;
+				color: rgb(214, 214, 214);
+				overflow: auto;
+
+				h1 {
+					font-size: 3rem;
+					margin: 1rem 0;
+				}
+				p,
+				pre {
+					max-width: 50rem;
+				}
+				p {
+					font-size: x-large;
+
+					span {
+						font-family: system-ui, -apple-system,
+							BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+							Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
+							sans-serif;
+					}
+				}
+				pre {
+					font-size: x-large;
+					background-color: black;
+					padding: 1rem;
+					box-sizing: border-box;
+					white-space: pre-wrap;
+					white-space: -moz-pre-wrap;
+					white-space: -pre-wrap;
+					white-space: -o-pre-wrap;
+					word-wrap: break-word;
+				}
+			}
+		}
+	}
 }
