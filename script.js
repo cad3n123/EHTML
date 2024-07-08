@@ -460,7 +460,7 @@ ${tagString('/set')}`),
 ${tagString('/set')}`),
 		],
 	]);
-	newInfoValue('User input', [
+	newInfoValue('User Input', [
 		[
 			$newP(`If you want to make an interactive program, you can use the ${bold(tagString('input'))} function. ${bold('Input')} will pause the program and wait until the user is done entering info. Once the user hits enter, ${bold('input')} will return the value entered and the program will resume.`),
 			$newP(`This program prompts the user for their name and stores it in the variable "${bold('name')}". It then greets them with their name.`),
@@ -493,7 +493,9 @@ ${tagString('/print')}`),
 
 ${tagString('set')}
 	${tagString('age')}
-	${tagString('input')}${tagString('/input')}
+	${tagString('number')}
+		${tagString('input')}${tagString('/input')}
+	${tagString('/number')}
 ${tagString('/set')}
 
 ${tagString('if')}
@@ -511,7 +513,9 @@ ${tagString('/if')}`),
 
 ${tagString('set')}
 	${tagString('age')}
-	${tagString('input')}${tagString('/input')}
+	${tagString('number')}
+		${tagString('input')}${tagString('/input')}
+	${tagString('/number')}
 ${tagString('/set')}
 
 ${tagString('if-else')}
@@ -590,8 +594,6 @@ function getRandomInt(max) {
 window.addEventListener('load', main);
 $textEditor.addEventListener('keydown', event => {
 	if (event.key == 'Tab') {
-		console.log('Tab clicked');
-
 		let selectedText = '';
 		if (window.getSelection) {	
 			selectedText = window.getSelection().toString();
@@ -734,7 +736,7 @@ $form.addEventListener('submit', event => {
 		 * @returns {boolean}
 		 */
 		function peekIs(value, offset = 0) {
-			return peek(offset) === value;
+			return isRoom(offset) && peek(offset) === value;
 		}
 		/**
 		 * @param {string} value
@@ -789,7 +791,7 @@ $form.addEventListener('submit', event => {
 					consume();
 					tokens.push(newToken(word, TokenType.LITERAL));
 				} else {
-					customError(`Expected '"' at the end of the string.`);
+					customError(`Expected " at the end of the string.`);
 					break;
 				}
 			} else {
@@ -926,7 +928,9 @@ $form.addEventListener('submit', event => {
 
 	// Run
 	(async () => {
-		$console.innerHTML = '';
+		if (!errorOccured) {
+			$console.innerHTML = '';
+		}
 		/**
 		 * @typedef {Object} Variable
 		 * @property {string} identifier
@@ -1100,7 +1104,6 @@ $form.addEventListener('submit', event => {
 					{
 						identifier: 'set',
 						run: async parameters => {
-							console.log('Running set!');
 							if (parameters.length != 2) {
 								customError(`'set' expects 2 parameters but received ${parameters.length}.`);
 								return;
@@ -1185,7 +1188,6 @@ $form.addEventListener('submit', event => {
 					{
 						identifier: 'print',
 						run: async parameters => {
-							console.log('Running print!');
 							if (parameters.length != 1) {
 								customError(`'print' expects 1 parameter but received ${parameters.length}.`);
 								return;
@@ -2129,6 +2131,9 @@ $form.addEventListener('submit', event => {
 			}
 			for (let i = 0; i < statementNodes.length; i++) {
 				const statementNode = statementNodes[i];
+				if (statementNode.type != NodeType.FUNCTION_CALL) {
+					customError(`Statement expects a function call but received "${statementNode.value1}".`);
+				}
 				if (statementNode.value1 === 'return') {
 					if (statementNode.value2.length > 1) {
 						customError(`Return was given ${statementNode.value2.length} values but expects 0 or 1.`);
