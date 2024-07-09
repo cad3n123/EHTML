@@ -2,7 +2,7 @@
 const [$main, $help, $textBoxes, $textEditor, $console, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
 const [$nav] = ['nav'].map(selector => document.querySelector(selector));
 const [$form] = ['form'].map(selector => $main.querySelector(selector));
-const loopMax = 1000;
+const loopMax = 2000;
 
 // Global Variables
 
@@ -1504,15 +1504,11 @@ $submitButton.addEventListener('click', () => {
 								customError(`'equal' expects 2 parameter but received ${parameters.length}.`);
 								return;
 							}
-							const parameterValues = await getParameterValues(
-								parameters,
-								scope
-							);
+							const parameterValues = await getParameterValues(parameters,scope);
 							const parameter1 = parameterValues[0];
 							let parameter2;
 							switch (parameter1.type) {
 								case NodeType.STRING:
-								case NodeType.LITERAL:
 									parameter2 = builtInToString(parameterValues[1]);
 									break;
 								case NodeType.NUMBER:
@@ -1532,6 +1528,7 @@ $submitButton.addEventListener('click', () => {
 									customError(`Cannot compare ${NodeTypeString[parameter1.type]}.`);
 									return;
 							}
+							return newNode(NodeType.BOOLEAN, parameter1.value1 === parameter2.value1);
 						},
 					},
 					{
@@ -1559,10 +1556,7 @@ $submitButton.addEventListener('click', () => {
 									customError(`Cannot compare ${NodeTypeString[parameter1.type]}.`);
 									return;
 							}
-							return newNode(
-								NodeType.BOOLEAN,
-								parameter1.value1 !== parameter2.value1
-							);
+							return newNode(NodeType.BOOLEAN, parameter1.value1 !== parameter2.value1);
 						},
 					},
 					{
@@ -1930,6 +1924,9 @@ $submitButton.addEventListener('click', () => {
 									break;
 								}
 								const booleanFunctionResult = await runFunction(newFunction(parameter1.value1.statementNodes, scope));
+								if (!(booleanFunctionResult && booleanFunctionResult.type == NodeType.BOOLEAN)) {
+									customError(`The first function in the "while" loop must return a boolean.`)
+								}
 								if (!booleanFunctionResult.value1) {
 									break;
 								}
