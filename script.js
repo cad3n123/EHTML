@@ -11,7 +11,7 @@ const loopMax = 1000;
  */
 const TokenType = {
 	ELEMENT: 0,
-	LITERAL: 1,
+	LITERAL: 1
 };
 /**
  * @typedef {number} TokenSubType
@@ -20,6 +20,9 @@ const TokenSubType = {
 	NONE: 0,
 	START: 1,
 	END: 2,
+	STRING: 3,
+	NUMBER: 4,
+	BOOLEAN: 5
 };
 /**
  * @typedef {Object} Token
@@ -222,18 +225,37 @@ function main() {
 		[
 			$newP(`A ${bold('string')} is a sequence of characters. To make one, surround whatever message you would like to encode string in quotes.`),
 			$newPre(`"Like this!"`),
+			$newP(`You can convert other values to a ${bold('string')} by surrounding it with opening and closing ${bold(tagString('string'))} tags.`),
+			$newP(`This would result in "10":`),
+			$newPre(`${tagString('string')}10${tagString('/string')}`),
+			$newP(`This would result in "false":`),
+			$newPre(`${tagString('string')}false${tagString('/string')}`)
 		],
 		[
-			$newP(`A ${bold('number')} is pretty self-explanatory. It can be a number with or without a decimal point, and can be negative. To make one, surround a number with opening and closing ${bold(tagString('number'))} tags.`),
-			$newP(`This is a number:`),
-			$newPre(`${tagString('number')}12${tagString('/number')}`),
+			$newP(`A ${bold('number')} is pretty self-explanatory. It can be a number with or without a decimal point, and can be negative. To convert another type into a number one, surround it with opening and closing ${bold(tagString('number'))} tags.`),
+			$newP(`This is a ${bold('number')}:`),
+			$newPre(`12`),
 			$newP(`And so is this:`),
-			$newPre(`${tagString('number')}-0.5${tagString('/number')}`),
+			$newPre(`-0.5`),
+			$newP(`This would be converted to the ${bold('number')} 10:`),
+			$newPre(`${tagString('number')}"10"${tagString('/number')}`),
+			$newP(`This would be 1:`),
+			$newPre(`${tagString('number')}true${tagString('/number')}`),
+			$newP(`And this would be 0:`),
+			$newPre(`${tagString('number')}false${tagString('/number')}`)
 		],
 		[
-			$newP(`A ${bold('boolean')} is a value that can either hold true or false. There are two built variables, ${bold(tagString('true'))} and ${bold(tagString('false'))}, but later we'll see how to compare values to dynamically get a boolean`),
-			$newPre(`${tagString('true')}`),
-			$newPre(`${tagString('false')}`),
+			$newP(`A ${bold('boolean')} is a value that can either hold true or false. There are two built identifiers, ${bold('true')} and ${bold('false')}, but later we'll see how to compare values to dynamically get a boolean`),
+			$newPre(`true`),
+			$newPre(`false`),
+			$newP(`You can also convert a ${bold('number')} into a ${bold('boolean')} by surrounding it with opening and closing ${bold(tagString('boolean'))} tags.`),
+			$newP(`If the number is 0, the result is ${bold('false')}. Any other number results in ${bold('true')}`),
+			$newP(`This is false:`),
+			$newPre(`${tagString('boolean')}0${tagString('/boolean')}`),
+			$newP(`And these are true:`),
+			$newPre(`${tagString('boolean')}1${tagString('/boolean')}`),
+			$newPre(`${tagString('boolean')}1000${tagString('/boolean')}`),
+			$newPre(`${tagString('boolean')}-10.5${tagString('/boolean')}`)
 		],
 		[
 			$newP(`A ${bold('function')} is a set of functions that can be called multiple times and optionally returns up to one value. When a function is created, the creator decides how many parameters it will take in. Later we'll see how to create our own functions.`),
@@ -243,9 +265,9 @@ function main() {
 			$newP(`A ${bold('list')} is a group of values- similar to a ${bold('string')} but able to take in any type of value.`),
 			$newP(`In order to create a list, call the ${bold(tagString('list'))} function and pass in as many values as you would like. You can add a value to the end of a list by passing in it and a new value to the ${bold(tagString('push'))} function. The ${bold(tagString('push'))} function removes the last value of the list and returns it.`),
 			$newPre(`${tagString('list')}
-    ${tagString('number')}1${tagString('/number')}
+    1
     "This is the second value"
-    ${tagString('true')}
+    true
     "This is the fourth value"
 ${tagString('/list')}`),
 		],
@@ -279,28 +301,28 @@ ${tagString('/set')}`),
 			$newP(`The ${bold(tagString('add'))}, ${bold(tagString('subtract'))}, ${bold(tagString('multiply'))}, ${bold(tagString('divide'))}, and ${bold(tagString('remainder'))} functions act exactly how you would expect them to work.`),
 			$newP(`10 + 5:`),
 			$newPre(`${tagString('add')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+   	5
 ${tagString('/add')}`),
 			$newP(`10 - 5:`),
 			$newPre(`${tagString('subtract')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/subtract')}`),
 			$newP(`10 * 5:`),
 			$newPre(`${tagString('multiply')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/multiply')}`),
 			$newP(`10 / 5:`),
 			$newPre(`${tagString('divide')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/divide')}`),
 			$newP(`10 % 5:`),
 			$newPre(`${tagString('remainder')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/remainder')}`),
 		],
 		[
@@ -308,25 +330,25 @@ ${tagString('/remainder')}`),
 			$newP(`For example, lets say we have a variable ${bold(tagString('x'))} with the value of 10. If we wanted to add 5 to it, without these functions, it would look like this:`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
-    ${tagString('number')}10${tagString('/number')}
+    10
 ${tagString('/set')}
 
 ${tagString('set')}
     ${tagString('x')}
     ${tagString('add')}
         ${tagString('x')}
-        ${tagString('number')}5${tagString('/number')}
+        5
     ${tagString('/add')}
 ${tagString('/set')}`),
 			$newP(`Alternatively, using ${bold('add-to')}, it would look like this:`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
-    ${tagString('number')}10${tagString('/number')}
+    10
 ${tagString('/set')}
 
 ${tagString('add-to')}
     ${tagString('x')}
-    ${tagString('number')}5${tagString('/number')}
+    5
 ${tagString('/add-to')}`),
 			$newP(`Although they don't add functionality, they substantially improve readability and reduce programming time.`),
 		],
@@ -357,13 +379,13 @@ ${tagString('/add-to')}`),
 			$newP(`${bold(tagString('less'))} and ${bold(tagString('greater'))} are used to compare two ${bold('numbers')}. The respectively represent the math <b><span>&lt</span></b> and <b><span>&gt</span></b> symbols.`),
 			$newP(`This would return false:`),
 			$newPre(`${tagString('less')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/less')}`),
 			$newP(`And this would return true:`),
 			$newPre(`${tagString('greater')}
-    ${tagString('number')}10${tagString('/number')}
-    ${tagString('number')}5${tagString('/number')}
+    10
+    5
 ${tagString('/greater')}`),
 		],
 		[
@@ -371,12 +393,12 @@ ${tagString('/greater')}`),
 			$newP(`Here are a few examples that return true:`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
-    ${tagString('number')}5${tagString('/number')}
+    5
 ${tagString('/set')}
 
 ${tagString('equal')}
     ${tagString('x')}
-    ${tagString('number')}5${tagString('/number')}
+    5
 ${tagString('/equal')}`),
 			$newPre(`${tagString('set')}
     ${tagString('name')}
@@ -397,8 +419,8 @@ ${tagString('not-equal')}
     "john"
 ${tagString('/not-equal')}`),
 			$newPre(`${tagString('equal')}
-    ${tagString('false')}
-    ${tagString('false')}
+    false
+    false
 ${tagString('/equal')}`),
 		],
 		[
@@ -501,7 +523,7 @@ ${tagString('/set')}
 ${tagString('if')}
 	${tagString('less')}
 		${tagString('age')}
-		${tagString('number')}21${tagString('/number')}
+		21
 	${tagString('/less')}
 
 	${tagString('function')}
@@ -521,7 +543,7 @@ ${tagString('/set')}
 ${tagString('if-else')}
 	${tagString('less')}
 		${tagString('age')}
-		${tagString('number')}21${tagString('/number')}
+		21
 	${tagString('/less')}
 
 	${tagString('function')}
@@ -546,7 +568,7 @@ ${tagString('/if-else')}`),
 			$newP(`Here is an example with a number guessing game:`),
 			$newPre(`${tagString('set')}
 	${tagString('answer')}
-	${tagString('number')}2${tagString('/number')}
+	2
 ${tagString('/set')}
 
 ${tagString('print')}"Enter a number between 1 and 10"${tagString('/print')}
@@ -669,7 +691,9 @@ $form.addEventListener('submit', event => {
 	 * @param {string} string
 	 */
 	function customError(string) {
-		addToConsole(`ERROR. ${string}`);
+		const errorMessage = `ERROR. ${string}`;
+		console.error(errorMessage);
+		addToConsole(errorMessage);
 		errorOccured = true;
 	}
 	/**
@@ -678,7 +702,7 @@ $form.addEventListener('submit', event => {
 	function addToConsole(text) {
 		if (!errorOccured) {
 			const $line = newConsoleLine();
-			const $text = document.createElement('p');
+			const $text = document.createElement('pre');
 			$text.innerHTML = text;
 			$line.appendChild(newCarrot());
 			$line.appendChild($text);
@@ -706,7 +730,7 @@ $form.addEventListener('submit', event => {
 			$textarea.addEventListener('keydown', event => {
 				if (event.key == 'Enter') {
 					const text = $textarea.value;
-					const $text = document.createElement('p');
+					const $text = document.createElement('pre');
 					$text.innerHTML = text;
 					$line.appendChild($text);
 					$textarea.remove();
@@ -736,7 +760,23 @@ $form.addEventListener('submit', event => {
 		 * @returns {boolean}
 		 */
 		function peekIs(value, offset = 0) {
-			return isRoom(offset) && peek(offset) === value;
+			return peek(offset) === value;
+		}
+		/**
+		 * @param {string} value
+		 * @param {number} offset
+		 * @returns {boolean}
+		 */
+		function peekIsNot(value, offset = 0) {
+			return peek(offset) !== value;
+		}
+		/**
+		 * @param {Array.<string>} values
+		 * @param {number} offset
+		 * @returns {boolean}
+		 */
+		function peekSomeAre(values, offset = 0) {
+			return values.some(value => peek(offset) === value);
 		}
 		/**
 		 * @param {string} value
@@ -775,34 +815,42 @@ $form.addEventListener('submit', event => {
 				while (peekIsNotRoom('>')) {
 					word += consume();
 				}
-				if (peekIs('>')) {
-					consume();
-					tokens.push(newToken(word, TokenType.ELEMENT, subType));
-				} else {
+				if (!isRoom()) {
 					customError(`Expected '>' at the end of the element.`);
 					break;
+				} else {
+					consume();
+					tokens.push(newToken(word, TokenType.ELEMENT, subType));
 				}
-			} else if (peekIs('"')) {
-				consume();
-				while (peekIsNotRoom('"')) {
+			} else if (peekSomeAre([`"`, `'`])) {
+				const quoteChar = consume();
+				while (peekIsNotRoom(quoteChar)) {
 					word += consume();
 				}
-				if (peekIs('"')) {
-					consume();
-					tokens.push(newToken(word, TokenType.LITERAL));
-				} else {
+				if (!isRoom()) {
 					customError(`Expected " at the end of the string.`);
 					break;
+				} else {
+					consume();
+					tokens.push(newToken(decodeURIComponent(JSON.parse('"' + word.replace('"', '\\"') + '"')), TokenType.LITERAL, TokenSubType.STRING));
 				}
 			} else {
-				while (peekIsNotRoom('<')) {
+				while (isRoom() && !(peekIs('<') || /\s/g.test(peek()))) {
 					word += consume();
 				}
-				if (peekIs('<')) {
-					tokens.push(newToken(word, TokenType.LITERAL));
+				let thisNewToken;
+				if (word === 'true' || word === 'false') {
+					thisNewToken = newToken(word === 'true' ? true : false, TokenType.LITERAL, TokenSubType.BOOLEAN);
 				} else {
-					customError(`Expected an end tag after a literal.`);
+					let newValue = Number(word);
+					if (newValue || newValue == 0) {
+						thisNewToken = newToken(newValue, TokenType.LITERAL, TokenSubType.NUMBER);
+					} else {
+						customError(`Unknown literal value "${word}".`)
+						return;
+					}
 				}
+				tokens.push(thisNewToken);
 			}
 		}
 		return tokens;
@@ -901,11 +949,25 @@ $form.addEventListener('submit', event => {
 						const nextElement = nodeStack.pop();
 						if (nextElement.type == NodeType.TOKEN) {
 							const nextElementToken = /** @type {Token} */ (nextElement.value1);
-							parameters.push(
-								nextElementToken.type == TokenType.ELEMENT
-									? newNode(NodeType.IDENTIFIER, nextElementToken.value)
-									: newNode(NodeType.LITERAL, nextElementToken.value)
-							);
+							if (nextElementToken.type == TokenType.ELEMENT) {
+								parameters.push(newNode(NodeType.IDENTIFIER, nextElementToken.value));
+							} else {
+								let thisNewNode;
+								switch (nextElementToken.subType) {
+									case TokenSubType.STRING:
+										thisNewNode = newNode(NodeType.STRING, nextElementToken.value);
+										break;
+									case TokenSubType.NUMBER:
+										thisNewNode = newNode(NodeType.NUMBER, nextElementToken.value);
+										break;
+									case TokenSubType.BOOLEAN:
+										thisNewNode = newNode(NodeType.BOOLEAN, nextElementToken.value);
+										break;
+									default:
+										break;
+								}
+								parameters.push(thisNewNode);
+							}
 						} else {
 							parameters.push(nextElement);
 						}
@@ -915,7 +977,20 @@ $form.addEventListener('submit', event => {
 					consume();
 				}
 			} else {
-				nodeStack.push(newNode(NodeType.LITERAL, consume().value));
+				const nextLiteral = peek();
+				let nodeType;
+				switch (nextLiteral.subType) {
+					case TokenSubType.STRING:
+						nodeType = NodeType.STRING;
+						break;
+					case TokenSubType.NUMBER:
+						nodeType = NodeType.NUMBER;
+						break;
+					case TokenSubType.BOOLEAN:
+						nodeType = NodeType.BOOLEAN;
+						break;
+				}
+				nodeStack.push(newNode(nodeType, consume().value));
 			}
 		}
 		return nodeStack;
@@ -1057,24 +1132,23 @@ $form.addEventListener('submit', event => {
 				 * @returns {MyNode}
 				 */
 				function builtInToNumber(parameter) {
-					if (parameter.type == NodeType.NUMBER) {
-						return parameter;
+					const value = parameter.value1;
+					switch (parameter.type) {
+						case NodeType.NUMBER:
+							return parameter;
+						case NodeType.BOOLEAN:
+							return newNode(NodeType.NUMBER, value ? 1 : 0);
+						case NodeType.STRING:
+							let newValue = Number(value);
+							if (!(newValue || newValue == 0)) {
+								customError(`Cannot convert "${value}" to number.`)
+								return;
+							}
+							return newNode(NodeType.NUMBER, newValue);
+						default:
+							customError(`Cannot convert ${NodeTypeString[parameter.type]} to number.`);
+							return;
 					}
-					let newValue;
-					if (
-						parameter.type == NodeType.LITERAL ||
-						parameter.type == NodeType.STRING ||
-						parameter.type == NodeType.BOOLEAN
-					) {
-						/** @type {string|boolean} */
-						const value = parameter.value1;
-						newValue = Number(value);
-					} else {
-						customError(`Cannot convert ${NodeTypeString[parameter.type]} to number.`);
-						return;
-					}
-
-					return newNode(NodeType.NUMBER, newValue);
 				}
 				/**
 				 *
@@ -1240,9 +1314,7 @@ $form.addEventListener('submit', event => {
 							if (parameters.length != 1) {
 								customError(`'string' expects 1 parameter but was given ${parameters.length}.`);
 							}
-							return builtInToString(
-								await getParameterValue(parameters[0], scope)
-							);
+							return builtInToString(await getParameterValue(parameters[0], scope));
 						},
 					},
 					{
@@ -1251,9 +1323,8 @@ $form.addEventListener('submit', event => {
 							if (parameters.length != 1) {
 								customError(`'number' expects 1 parameter but was given ${parameters.length}.`);
 							}
-							return builtInToNumber(
-								await getParameterValue(parameters[0], scope)
-							);
+							const parameter = await getParameterValue(parameters[0], scope);
+							return builtInToNumber(parameter);
 						},
 					},
 					{
@@ -1262,9 +1333,7 @@ $form.addEventListener('submit', event => {
 							if (parameters.length != 1) {
 								customError(`'boolean' expects 1 parameter but was given ${parameters.length}.`);
 							}
-							return builtInToBoolean(
-								await getParameterValue(parameters[0], scope)
-							);
+							return builtInToBoolean(await getParameterValue(parameters[0], scope));
 						},
 					},
 					{
@@ -1283,25 +1352,18 @@ $form.addEventListener('submit', event => {
 							switch (parameter1.type) {
 								case NodeType.STRING:
 								case NodeType.LITERAL:
-									parameter2 = builtInToString(
-										parameterValues[1]
-									);
+									parameter2 = builtInToString(parameterValues[1]);
 									break;
 								case NodeType.NUMBER:
-									parameter2 = builtInToNumber(
-										parameterValues[1]
-									);
+									parameter2 = builtInToNumber(parameterValues[1]);
 									break;
 								case NodeType.BOOLEAN:
-									parameter2 = builtInToBoolean(
-										parameterValues[1]
-									);
+									parameter2 = builtInToBoolean(parameterValues[1]);
 									break;
 								case NodeType.TYPE:
 									parameter2 = parameterValues[1];
 									if (parameter2.type != NodeType.TYPE) {
-										customError(`Cannot compare type to ${NodeTypeString[parameter2.type]}.`
-										);
+										customError(`Cannot compare type to ${NodeTypeString[parameter2.type]}.`);
 										return;
 									}
 									break;

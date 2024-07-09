@@ -130,7 +130,6 @@ body {
 
 				.line {
 					display: flex;
-					margin-bottom: 0.5rem;
 
 					* {
 						display: inline-block;
@@ -150,8 +149,11 @@ body {
 						outline: none;
 					}
 					p {
-						word-wrap: break-word;
 						min-width: 0.5rem;
+					}
+					pre {
+						font-family: unset;
+						word-wrap: break-word;
 					}
 				}
 				.line.input {
