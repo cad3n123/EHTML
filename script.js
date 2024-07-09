@@ -254,7 +254,7 @@ function main() {
 	]);
 	newInfoValue('Types', [
 		[
-			$newP(`There are 5 different types in ${bold('EHTML')}: Strings, Numbers, Booleans, Functions, and Lists.`),
+			$newP(`There are six different types in ${bold('EHTML')}: Strings, Numbers, Booleans, Functions, Lists and Types.`),
 		],
 		[
 			$newP(`A ${bold('string')} is a sequence of characters. To make one, surround whatever message you would like to encode string in quotes.`),
@@ -336,6 +336,21 @@ ${tagString('/list')}`),
 			$newP(`The ${bold(tagString('set-at'))} function takes in a ${bold('list')} or ${bold('string')}, an index, and a new value, and sets the value at that index to the new value.`),
 			$newP(`The ${bold(tagString('slice'))} function takes in a beginning index and an optional end index. The function returns a new ${bold('list')} or ${bold('string')} containing the values from the beginning index to the end index. If the end index is excluded, it will just get all the values from the beginning index to the end.`),
 		],
+		[
+			$newP(`The ${bold(tagString('type-of'))} function takes in a value and returns its ${bold('type')}.`),
+			$newP(`This would return ${bold('String')}:`),
+			$newPre(`${tagString('type-of')}"Hello, world!"${tagString('/type-of')}`),
+			$newP(`This would return ${bold('Number')}:`),
+			$newPre(`${tagString('type-of')}10${tagString('/type-of')}`),
+			$newP(`This would return ${bold('Boolean')}:`),
+			$newPre(`${tagString('type-of')}true${tagString('/type-of')}`),
+			$newP(`This would return ${bold('List')}:`),
+			$newPre(`${tagString('type-of')}${tagString('list')} 10 5 ${tagString('/list')}${tagString('/type-of')}`),
+			$newP(`This would return ${bold('Function')}:`),
+			$newPre(`${tagString('type-of')}${tagString('print')}${tagString('/type-of')}`),
+			$newP(`This would return ${bold('Type')}:`),
+			$newPre(`${tagString('type-of')}${tagString('type-of')}10${tagString('/type-of')}${tagString('/type-of')}`)
+		]
 	]);
 	newInfoValue('Variables', [
 		[
@@ -443,7 +458,7 @@ ${tagString('/less')}`),
 ${tagString('/greater')}`),
 		],
 		[
-			$newP(`${bold(tagString('equal'))} and ${bold(tagString('not-equal'))} test for equivalence of ${bold('numbers')}, ${bold('booleans')}, and ${bold('strings')}.`),
+			$newP(`${bold(tagString('equal'))} and ${bold(tagString('not-equal'))} test for equivalence of ${bold('numbers')}, ${bold('booleans')}, ${bold('strings')}, and ${bold('types')}.`),
 			$newP(`Here are a few examples that return true:`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
@@ -475,6 +490,15 @@ ${tagString('/not-equal')}`),
 			$newPre(`${tagString('equal')}
     false
     false
+${tagString('/equal')}`),
+			$newPre(`${tagString('set')}
+    ${tagString('x')}
+    5
+${tagString('/set')}
+
+${tagString('equal')}
+	${tagString('type-of')}${tagString('x')}${tagString('/type-of')}
+    ${tagString('type-of')}5${tagString('/type-of')}
 ${tagString('/equal')}`),
 		],
 		[
@@ -2284,6 +2308,10 @@ $submitButton.addEventListener('click', () => {
 							return functionResult;
 						}
 					case NodeType.IDENTIFIER:
+						const builtInFunction = builtInFunctions.find(builtInFunction => builtInFunction.identifier === parameter.value1);
+						if (builtInFunction) {
+							return newNode(NodeType.FUNCTION, builtInFunction.run)
+						}
 						const variable = getVariable(parameter.value1, scope);
                         if (!variable) {
                             customError(`Unknown variable '${parameter.value1}'.`);
