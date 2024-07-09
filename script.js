@@ -1,5 +1,6 @@
 // Global Constants
-const [$main, $help, $textBoxes, $textEditor, $console] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console' ].map(id => document.getElementById(id));
+const [$main, $help, $textBoxes, $textEditor, $console, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
+const [$nav] = ['nav'].map(selector => document.querySelector(selector));
 const [$form] = ['form'].map(selector => $main.querySelector(selector));
 const loopMax = 1000;
 
@@ -122,15 +123,45 @@ function newConsoleLine() {
 
 // Functions
 function main() {
+	const divs = document.querySelectorAll('div');
+	const $coffeeBox = divs.item(divs.length - 1);
+	$coffeeBox.id = 'coffee-box';
+
 	const [$info, $infoSideBar] = ['info', 'info-side-bar'].map(id => document.getElementById(id));
-	[$form, $help].forEach(($mainElement, index, mainElements) => {
-		const $button = $mainElement.querySelector('nav').querySelector('.right').querySelector('li');
-		const $otherMainElement = mainElements[mainElements.length - 1 - index];
-		$button.addEventListener('click', () => {
-			$otherMainElement.classList.remove('hidden');
-			$mainElement.classList.add('hidden');
-		});
-	});
+	const [$switchButton, $left] = ['li', '.left'].map(selector => $nav.querySelector(selector));
+	const [$i] = ['i'].map(selector => $left.querySelector(selector));
+	let showForm = () => {};
+	let showHelp = () => {};
+	showForm = () => {
+		$help.classList.add('hidden');
+		$form.classList.remove('hidden');
+		$i.classList.add('hidden');
+		$submitButton.classList.remove('hidden');
+
+		$switchButton.innerHTML = 'Help';
+		$switchButton.onclick = showHelp;
+	}
+	showHelp = () => {
+		$help.classList.remove('hidden');
+		$form.classList.add('hidden');
+		$i.classList.remove('hidden');
+		$submitButton.classList.add('hidden');
+
+		$switchButton.innerHTML = 'Back';
+		$switchButton.onclick = showForm;
+	}
+	$switchButton.onclick = () => {showHelp()};
+	const $infoSideBarShadow = document.createElement('div');
+	$infoSideBarShadow.id = 'info-side-bar-shadow'
+	document.body.appendChild($infoSideBarShadow);
+	$i.addEventListener('click', () => {
+		$infoSideBar.classList.toggle('active');
+		$infoSideBarShadow.classList.toggle('active');
+	})
+	$infoSideBarShadow.addEventListener('click', () => {
+		$infoSideBar.classList.remove('active');
+		$infoSideBarShadow.classList.remove('active');
+	})
 	let sideNavElements = [];
 	/**
 	 *
@@ -193,6 +224,9 @@ function main() {
 				$info.removeChild($info.lastChild);
 			}
 
+			$infoSideBar.classList.remove('active');
+			$infoSideBarShadow.classList.remove('active');
+
 			$info.scrollTop = 0;
 			/** @type {Array.<HTMLElement} */
 			const $title = $('h1');
@@ -242,7 +276,27 @@ function main() {
 			$newP(`This would be 1:`),
 			$newPre(`${tagString('number')}true${tagString('/number')}`),
 			$newP(`And this would be 0:`),
-			$newPre(`${tagString('number')}false${tagString('/number')}`)
+			$newPre(`${tagString('number')}false${tagString('/number')}`),
+			$newP(`The ${bold(tagString('round'))} function takes in a number and returns the value rounded to the nearest integer. If it is halfway between two integers, it will round to the integer greater than it.`),
+			$newP(`The results of the next three code segments would be 5, 6, and -5.`),
+			$newPre(`${tagString('round')}5.1${tagString('/round')}`),
+			$newPre(`${tagString('round')}5.5${tagString('/round')}`),
+			$newPre(`${tagString('round')}-5.5${tagString('/round')}`),
+			$newP(`The ${bold(tagString('floor'))} function takes in a number and returns the value rounded down to the nearest integer.`),
+			$newP(`The results of the next three code segments would be 5, 5, and -6.`),
+			$newPre(`${tagString('floor')}5.1${tagString('/floor')}`),
+			$newPre(`${tagString('floor')}5.5${tagString('/floor')}`),
+			$newPre(`${tagString('floor')}-5.5${tagString('/floor')}`),
+			$newP(`The ${bold(tagString('ceil'))} function takes in a number and returns the value rounded up to the nearest integer.`),
+			$newP(`The results of the next three code segments would be 6, 6, and -5.`),
+			$newPre(`${tagString('ceil')}5.1${tagString('/ceil')}`),
+			$newPre(`${tagString('ceil')}5.5${tagString('/ceil')}`),
+			$newPre(`${tagString('ceil')}-5.5${tagString('/ceil')}`),
+			$newP(`The ${bold(tagString('trunc'))} function takes in a number and returns the value as an integer, ignoring the numbers after the decimal place.`),
+			$newP(`The results of the next three code segments would be 5, 5, and -5.`),
+			$newPre(`${tagString('trunc')}5.1${tagString('/trunc')}`),
+			$newPre(`${tagString('trunc')}5.5${tagString('/trunc')}`),
+			$newPre(`${tagString('trunc')}-5.5${tagString('/trunc')}`)
 		],
 		[
 			$newP(`A ${bold('boolean')} is a value that can either hold true or false. There are two built identifiers, ${bold('true')} and ${bold('false')}, but later we'll see how to compare values to dynamically get a boolean`),
@@ -486,9 +540,7 @@ ${tagString('/set')}`),
 		[
 			$newP(`If you want to make an interactive program, you can use the ${bold(tagString('input'))} function. ${bold('Input')} will pause the program and wait until the user is done entering info. Once the user hits enter, ${bold('input')} will return the value entered and the program will resume.`),
 			$newP(`This program prompts the user for their name and stores it in the variable "${bold('name')}". It then greets them with their name.`),
-			$newPre(`${tagString('print')}"What is your name?"${tagString(
-				'/print'
-			)}
+			$newPre(`${tagString('print')}"What is your name?"${tagString('/print')}
 
 ${tagString('set')}
     ${tagString('name')}
@@ -600,7 +652,118 @@ ${tagString('/while')}
 ${tagString('print')}"You guessed it right"${tagString('/print')}`)
 		],
 		[
-			$newP(`${bold('For-each')}`)
+			$newP(`${bold('For-each')} function has two variants: ${bold(tagString('for-each'))} and ${bold(tagString('enum-for-each'))}. For both functions, the first value passed in is a string or an array.`),
+			$newP(`The second parameter for the regular ${bold('for-each')} function is a function that takes in one parameter which will hold the value of the current item. The loop will run for each item in the list or character in the string.`),
+			$newP(`For example, say we have a list of grades that a student has made, and we want to find their average. We could make a variable called ${bold('total')}, and on each iteration, add the grade to the total. We could then divide the total by the total number of grades, which we can find out using the ${bold('length')} function.`),
+			$newPre(`${tagString('set')}
+	${tagString('grades')}
+
+	${tagString('list')}
+		95
+		100
+		85
+		70
+		100
+	${tagString('/list')}
+${tagString('/set')}
+
+${tagString('set')}
+	${tagString('total')}
+	0
+${tagString('/set')}
+
+${tagString('for-each')}
+	${tagString('grades')}
+
+	${tagString('function')}
+		${tagString('params')}
+			${tagString('grade')}
+		${tagString('/params')}
+
+		${tagString('add-to')}
+			${tagString('total')}
+			${tagString('grade')}
+		${tagString('/add-to')}
+	${tagString('/function')}
+${tagString('/for-each')}
+
+${tagString('set')}
+	${tagString('average')}
+
+	${tagString('divide')}
+		${tagString('total')}
+
+		${tagString('length')}
+			${tagString('grades')}
+		${tagString('/length')}
+	${tagString('/divide')}
+${tagString('/set')}
+
+${tagString('print')}
+	${tagString('add')}
+		"Average: "
+		${tagString('average')}
+	${tagString('/add')}
+${tagString('/print')}`)
+		],
+		[
+			$newP(`The ${bold(tagString('enum-for-each'))} function is very similar to the ${bold(tagString('for-each'))} function. The only difference is that the function the loop over takes in two parameters rather than one. The first parameter is still the item that the loop takes in. The second parameter is the index of that item.`),
+			$newP(`For example, say we want to convert the list of grades from the previous example into a string. Our end product could look like ${bold('[95, 100, 85, 70, 100]')}. At first, a ${bold(tagString('for-each'))} loop seems like it would work. The only problem is that on the last item, we would not need to add ", " like we would for the other items. That's where the ${bold(tagString('enum-for-each'))} function comes in.`),
+			$newPre(`${tagString('set')}
+	${tagString('grades')}
+
+	${tagString('list')}
+			95
+			100
+			85
+			70
+			100
+	${tagString('/list')}
+${tagString('/set')}
+
+${tagString('set')}
+	${tagString('result')}
+	"["
+${tagString('/set')}
+
+${tagString('enum-for-each')}
+	${tagString('grades')}
+
+	${tagString('function')}
+		${tagString('params')}
+			${tagString('grade')}
+			${tagString('index')}
+		${tagString('/params')}
+
+		${tagString('add-to')}
+			${tagString('result')}
+			${tagString('grade')}
+		${tagString('/add-to')}
+
+		${tagString('if')}
+			${tagString('not-equal')}
+				${tagString('index')}
+
+				${tagString('subtract')}
+					${tagString('length')}${tagString('grades')}${tagString('/length')}
+					1
+				${tagString('/subtract')}
+			${tagString('/not-equal')}
+
+			${tagString('function')}
+				${tagString('add-to')}
+					${tagString('result')}
+					", "
+				${tagString('/add-to')}
+			${tagString('/function')}
+		${tagString('/if')}
+	${tagString('/function')}
+${tagString('/enum-for-each')}
+
+${tagString('add-to')}
+	${tagString('result')}
+	"]"
+${tagString('/add-to')}`)
 		]
 	]);
 
@@ -682,9 +845,7 @@ $textEditor.addEventListener('keydown', event => {
 		}
 	}
 });
-$form.addEventListener('submit', event => {
-	event.preventDefault();
-
+$submitButton.addEventListener('click', () => {
 	let errorOccured = false;
 	/**
 	 *

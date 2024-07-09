@@ -6,6 +6,7 @@
 	--orange: #ff813f;
 	--dark-orange: #cc6732;
 	--x-dark-orange: #b25a2c;
+	--nav-height: 3rem;
 
 	tab-size: 4;
 }
@@ -15,7 +16,19 @@ body {
 }
 
 #bmc-wbtn {
-	right: 2rem !important;
+	right: 0.5rem !important;
+	bottom: 0.5rem !important;
+	transform: scale(0.7) !important;
+}
+#bmc-wbtn:hover {
+	transform: scale(0.8) !important;
+}
+
+#coffee-box {
+	right: 4.5rem !important;
+	bottom: 1.5rem !important;
+	padding: 0.5rem !important;
+	font-size: small !important;
 }
 
 .no-select {
@@ -28,12 +41,93 @@ body {
                                     supported by Chrome, Edge, Opera and Firefox */
 }
 
+#top-nav {
+	position: fixed;
+	box-sizing: border-box;
+	width: 100%;
+	height: var(--nav-height);
+	padding: 0 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--orange);
+	z-index: 1;
+
+	.left {
+		justify-self: left;
+		width: max-content;
+
+		i {
+			margin-top: 0.5rem;
+		}
+		i:hover {
+			cursor: pointer;
+		}
+		i.hidden {
+			display: none;
+		}
+		button {
+			--size: 2.25rem;
+
+			padding-left: 8px;
+			font-size: x-large;
+			box-sizing: border-box;
+			width: var(--size);
+			height: var(--size);
+			border-radius: 1rem;
+			text-align: center;
+			border-style: none;
+			cursor: pointer;
+			color: var(--x-dark-orange);
+			background-color: var(--light-orange);
+		}
+		button:hover {
+			background-color: var(--x-light-orange);
+		}
+		button:active {
+			opacity: 0.7;
+		}
+		button.hidden {
+			display: none;
+		}
+	}
+	.right {
+		li {
+			list-style: none;
+			height: max-content;
+			margin: auto;
+			font-size: x-large;
+			cursor: pointer;
+		}
+		li:hover {
+			color: var(--xx-light-orange);
+		}
+		li:active {
+			opacity: 0.7;
+		}
+	}
+}
+#info-side-bar-shadow {
+	width: 100vw;
+	height: 100vh;
+	background-color: black;
+	opacity: 0.5;
+	cursor: pointer;
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: none;
+}
+#info-side-bar-shadow.active {
+	display: block;
+}
+.nav-gap {
+	height: var(--nav-height);
+}
 #main {
 	box-sizing: border-box;
-	height: 100vh;
+	height: calc(100vh - var(--nav-height));
 	margin: 0;
-	padding-top: 1rem;
-	background-color: var(--orange);
 	color: var(--off-white);
 
 	.content.hidden {
@@ -46,65 +140,12 @@ body {
 		flex-direction: column;
 		gap: 1rem;
 
-		> nav {
-			box-sizing: border-box;
-			width: 100%;
-			height: 3rem;
-			padding: 0 1rem;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-
-			.left {
-				justify-self: left;
-				width: max-content;
-
-				button {
-					--size: 2.25rem;
-
-					padding-left: 8px;
-					font-size: x-large;
-					box-sizing: border-box;
-					width: var(--size);
-					height: var(--size);
-					border-radius: 1rem;
-					text-align: center;
-					border-style: none;
-					cursor: pointer;
-					color: var(--x-dark-orange);
-					background-color: var(--light-orange);
-				}
-				button:hover {
-					background-color: var(--x-light-orange);
-				}
-				button:active {
-					opacity: 0.7;
-				}
-			}
-			.right {
-				li {
-					list-style: none;
-					height: max-content;
-					margin: auto;
-					font-size: x-large;
-					cursor: pointer;
-				}
-				li:hover {
-					color: var(--xx-light-orange);
-				}
-				li:active {
-					opacity: 0.7;
-				}
-			}
-		}
-		> div {
-			display: flex;
+		#text-boxes {
 			min-height: 0;
 			height: 100%;
-		}
-	}
-	form {
-		#text-boxes {
+			display: flex;
+			flex-direction: column;
+			
 			#text-editor {
 				box-sizing: border-box;
 				width: 100%;
@@ -168,21 +209,28 @@ body {
 			color: black;
 
 			#info-side-bar {
+				position: fixed;
 				flex-shrink: 1;
 				box-sizing: border-box;
 				padding-top: 0.5rem;
 				background-color: lightgray;
 				width: max-content;
+				height: calc(100vh - var(--nav-height));
+				z-index: 1;
+				display: none;
 
 				p {
 					box-sizing: border-box;
 					background-color: white;
-					padding: 0.25rem 2rem 0.25rem 1rem;
 					margin: 0;
 					min-width: 100%;
 					width: max-content;
 					cursor: pointer;
-					font-size: x-large;
+					font-size: medium;
+					width: auto;
+					padding: 0.25rem 2rem 0.25rem 1rem;
+					overflow: hidden;
+					transition: width 2s;
 				}
 				p:hover {
 					background-color: darkgray;
@@ -194,16 +242,19 @@ body {
 					background-color: var(--orange);
 				}
 			}
+			#info-side-bar.active {
+				display: block;
+			}
 			#info {
 				scrollbar-color: darkgrey rgb(52, 48, 43);
 				flex-grow: 1;
 				background-color: rgb(52, 48, 43);
-				padding: 2rem 2rem 5rem 4rem;
+				padding: 2rem 2rem 5rem 2rem;
 				color: rgb(214, 214, 214);
 				overflow: auto;
 
 				h1 {
-					font-size: 3rem;
+					font-size: 2rem;
 					margin: 1rem 0;
 				}
 				p,
@@ -211,7 +262,7 @@ body {
 					max-width: 50rem;
 				}
 				p {
-					font-size: x-large;
+					font-size: medium;
 
 					span {
 						font-family: system-ui, -apple-system,
@@ -221,7 +272,7 @@ body {
 					}
 				}
 				pre {
-					font-size: x-large;
+					font-size: medium;
 					background-color: black;
 					padding: 1rem;
 					box-sizing: border-box;
@@ -230,6 +281,104 @@ body {
 					white-space: -pre-wrap;
 					white-space: -o-pre-wrap;
 					word-wrap: break-word;
+				}
+			}
+		}
+	}
+}
+
+@media only screen and (min-width: 768px) {
+	:root {
+		--nav-height: 4rem;
+	}
+	
+	#bmc-wbtn {
+		right: 2rem !important;
+		bottom: 1.5rem !important;
+		transform: scale(1) !important;
+	}
+	#bmc-wbtn:hover {
+		transform: scale(1.1) !important;
+	}
+	#coffee-box {
+		right: 7rem !important;
+		bottom: 1.75rem !important;
+		padding: 1rem !important;
+		font-size: large !important;
+	}
+	#top-nav {
+	
+		.left {
+	
+			button {
+			}
+			i {
+				display: none;
+			}
+		}
+		.right {
+			li {
+				font-size: xx-large;
+			}
+		}
+	}
+	#main {
+		.content {
+			#text-boxes {
+				flex-direction: row;
+				
+				#text-editor {
+				}
+				#console {
+	
+					.line {
+						textarea {
+						}
+						p {
+						}
+						pre {
+						}
+					}
+					.line.input {
+					}
+				}
+			}
+		}
+		#help {
+			height: calc(100vh - var(--nav-height));
+
+			> div {
+				display: flex;
+				height: 100%;
+	
+				#info-side-bar {
+					position: relative;
+					display: block;
+					z-index: 0;
+					flex-shrink: 1;
+					p {
+						font-size: x-large;
+						width: max-content;
+					}
+				}
+				#info {
+					box-sizing: border-box;
+					height: 100%;
+					padding: 2rem 2rem 4rem 5rem;
+
+					h1 {
+						font-size: 3rem;
+						margin: 1rem 0;
+					}
+					p {
+						font-size: x-large;
+					}
+					pre {
+						font-size: x-large;
+					}
+					p, pre {
+						max-width: 60rem;
+					}
 				}
 			}
 		}
