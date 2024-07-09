@@ -317,7 +317,7 @@ function main() {
 		],
 		[
 			$newP(`A ${bold('list')} is a group of values- similar to a ${bold('string')} but able to take in any type of value.`),
-			$newP(`In order to create a list, call the ${bold(tagString('list'))} function and pass in as many values as you would like. You can add a value to the end of a list by passing in it and a new value to the ${bold(tagString('push'))} function. The ${bold(tagString('push'))} function removes the last value of the list and returns it.`),
+			$newP(`In order to create a list, call the ${bold(tagString('list'))} function and pass in as many values as you would like. You can add a value to the end of a list by passing in it and a new value to the ${bold(tagString('push'))} function. The ${bold(tagString('pop'))} function removes the last value of the list and returns it.`),
 			$newPre(`${tagString('list')}
     1
     "This is the second value"
@@ -333,7 +333,7 @@ ${tagString('/list')}`),
 			$newP(`Each value in a ${bold('list')} or ${bold('string')} has an index. The first item's index is 0, the second is item's index is 1, and so on.`),
 			$newP(`The ${bold(tagString('length'))} function returns the length of a string or list.`),
 			$newP(`The ${bold(tagString('value-at'))} function takes in a ${bold('list')} or ${bold('string')} and an index, and returns the item at that index.`),
-			$newP(`The ${bold(tagString('set-at'))} function takes in a ${bold('list')} or ${bold('string')}, and index, and a new value, and sets the value at that index to the new value.`),
+			$newP(`The ${bold(tagString('set-at'))} function takes in a ${bold('list')} or ${bold('string')}, an index, and a new value, and sets the value at that index to the new value.`),
 			$newP(`The ${bold(tagString('slice'))} function takes in a beginning index and an optional end index. The function returns a new ${bold('list')} or ${bold('string')} containing the values from the beginning index to the end index. If the end index is excluded, it will just get all the values from the beginning index to the end.`),
 		],
 	]);
@@ -443,7 +443,7 @@ ${tagString('/less')}`),
 ${tagString('/greater')}`),
 		],
 		[
-			$newP(`${bold(tagString('equal'))} and ${bold(tagString('not-equal'))} test for equivalance of ${bold('numbers')}, ${bold('booleans')}, and ${bold('strings')}.`),
+			$newP(`${bold(tagString('equal'))} and ${bold(tagString('not-equal'))} test for equivalence of ${bold('numbers')}, ${bold('booleans')}, and ${bold('strings')}.`),
 			$newP(`Here are a few examples that return true:`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
@@ -480,7 +480,7 @@ ${tagString('/equal')}`),
 		[
 			$newP(`${bold(tagString('and'))}, ${bold(tagString('or'))}, and ${bold(tagString('not'))} are functions that only take in booleans.`),
 			$newP(`${bold('And')} takes in two boolean values and returns ${bold('true')} if both values are ${bold('true')}.`),
-			$newP(`${bold('And')} takes in two boolean values and returns ${bold('true')} if one or both values are ${bold('true')}.`),
+			$newP(`${bold('Or')} takes in two boolean values and returns ${bold('true')} if one or both values are ${bold('true')}.`),
 			$newP(`${bold('Not')} takes in one boolean value and inverts it. If ${bold('true')} is passed in, it returns ${bold('false')}. If ${bold('false')} is passed in, it returns ${bold('true')}.`),
 		],
 	]);
@@ -502,7 +502,7 @@ ${tagString('/set')}`),
 		],
 		[
 			$newP(`The ${bold(tagString('return'))} function can only be used inside the ${bold('function')} function. It takes the value that you want to return from the function and also stops the rest of the statements in the function from being called.`),
-			$newP(`The ${bold(tagString('params'))} function also can ony be used inside the ${bold('function')} function. This lets you decide how many parameters your function will accept, and automatically assigns their values to the variable names that you choose.`),
+			$newP(`The ${bold(tagString('params'))} function also can only be used inside the ${bold('function')} function. This lets you decide how many parameters your function will accept and automatically assigns their values to the variable names that you choose.`),
 			$newP(`Say you want to make a function called ${bold('three-sum')} that takes three numbers, adds them all together, prints the total, and finally returns that value. You could do that like this:`),
 			$newPre(`${tagString('set')}
     ${tagString('three-sum')}
@@ -538,7 +538,7 @@ ${tagString('/set')}`),
 	]);
 	newInfoValue('User Input', [
 		[
-			$newP(`If you want to make an interactive program, you can use the ${bold(tagString('input'))} function. ${bold('Input')} will pause the program and wait until the user is done entering info. Once the user hits enter, ${bold('input')} will return the value entered and the program will resume.`),
+			$newP(`If you want to make an interactive program, you can use the ${bold(tagString('input'))} function. ${bold('Input')} will pause the program and wait until the user is done entering info. Once the user hits enter, ${bold('input')} will return the value entered, and the program will resume.`),
 			$newP(`This program prompts the user for their name and stores it in the variable "${bold('name')}". It then greets them with their name.`),
 			$newPre(`${tagString('print')}"What is your name?"${tagString('/print')}
 
@@ -707,7 +707,7 @@ ${tagString('print')}
 ${tagString('/print')}`)
 		],
 		[
-			$newP(`The ${bold(tagString('enum-for-each'))} function is very similar to the ${bold(tagString('for-each'))} function. The only difference is that the function the loop over takes in two parameters rather than one. The first parameter is still the item that the loop takes in. The second parameter is the index of that item.`),
+			$newP(`The ${bold(tagString('enum-for-each'))} function is very similar to the ${bold(tagString('for-each'))} function. The only difference is that the function that loops takes in two parameters rather than one. The first parameter is still the item that the loop takes in. The second parameter is the index of that item.`),
 			$newP(`For example, say we want to convert the list of grades from the previous example into a string. Our end product could look like ${bold('[95, 100, 85, 70, 100]')}. At first, a ${bold(tagString('for-each'))} loop seems like it would work. The only problem is that on the last item, we would not need to add ", " like we would for the other items. That's where the ${bold(tagString('enum-for-each'))} function comes in.`),
 			$newPre(`${tagString('set')}
 	${tagString('grades')}
