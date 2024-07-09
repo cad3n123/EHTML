@@ -313,7 +313,7 @@ function main() {
 		],
 		[
 			$newP(`A ${bold('function')} is a set of functions that can be called multiple times and optionally returns up to one value. When a function is created, the creator decides how many parameters it will take in. Later we'll see how to create our own functions.`),
-			$newP(`Calling a function is pretty simple. You've already seen how to call the ${bold('number')} function. This is how you call the ${bold('print')} function.`),$newPre(`${tagString('print')}"Hello, World!${tagString('/print')}`),
+			$newP(`Calling a function is pretty simple. You've already seen how to call the ${bold('number')} function. This is how you call the ${bold('print')} function.`),$newPre(`${tagString('print')}"Hello, world!${tagString('/print')}`),
 		],
 		[
 			$newP(`A ${bold('list')} is a group of values- similar to a ${bold('string')} but able to take in any type of value.`),
@@ -342,10 +342,10 @@ ${tagString('/list')}`),
 			$newP(`In order to declare a variable, you can use the ${bold(tagString('set'))} function. ${bold('Set')} takes in two parameters. The first is a tag that will represent the variable. The second is the value that the variable will hold.`),
 		],
 		[
-			$newP(`For example, you can create a variable ${bold(tagString('x'))} and assign it the value of ${bold('Hello, World!')}, making sure to surround the message in quotes.`),
+			$newP(`For example, you can create a variable ${bold(tagString('x'))} and assign it the value of ${bold('Hello, world!')}, making sure to surround the message in quotes.`),
 			$newPre(`${tagString('set')}
     ${tagString('x')}
-    "Hello, World!"
+    "Hello, world!"
 ${tagString('/set')}`),
 		],
 	]);
@@ -490,11 +490,11 @@ ${tagString('/equal')}`),
 			$newP(`For a ${bold('function')}, the second parameter will be the ${bold(tagString('function'))} function. You can only write statements in the ${bold('function')} function.`),
 		],
 		[
-			$newP(`For example, a function that prints ${bold('Hello, World!')} when called would look like this:`),
+			$newP(`For example, a function that prints ${bold('Hello, world!')} when called would look like this:`),
 			$newPre(`${tagString('set')}
     ${tagString('my-function')}
     ${tagString('function')}
-        ${tagString('print')}"Hello, World!"${tagString('/print')}
+        ${tagString('print')}"Hello, world!"${tagString('/print')}
     ${tagString('/function')}
 ${tagString('/set')}`),
 			$newP(`Calling ${bold('my-function')} is the same as calling any other function. All you have to do is write the beginning  and end tag, and since it takes in no parameters (we'll discuss how to do that soon), you don't need to put any values in between the tags.`),
