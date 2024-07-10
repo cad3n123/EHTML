@@ -263,7 +263,30 @@ function main() {
 			$newP(`This would result in "10":`),
 			$newPre(`${tagString('string')}10${tagString('/string')}`),
 			$newP(`This would result in "false":`),
-			$newPre(`${tagString('string')}false${tagString('/string')}`)
+			$newPre(`${tagString('string')}false${tagString('/string')}`),
+			$newP(`The ${bold(tagString('to-uppercase'))} and ${bold(tagString('to-lowercase'))} functions can be used to convert all of the characters in a string that are letters to uppercase or lowercase. The next two code blocks would result in "CADEN123!" and then "caden123!" respectively.`),
+			$newPre(`${tagString('to-uppercase')}"cAdEn123!"${tagString('/to-uppercase')}`),
+			$newPre(`${tagString('to-lowercase')}"cAdEn123!"${tagString('/to-lowercase')}`),
+			$newP(`There are a few functions that test the value of a string. ${bold(tagString('is-numeric'))} returns ${bold('true')} if the string can be converted to a ${bold('number')} and returns ${bold('false')} otherwise. ${bold(tagString('is-letters'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet and ${bold('false')} otherwise. ${bold(tagString('is-alphanumeric'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet or are a number. Otherwise, it returns ${bold('false')}. ${bold(tagString('is-whitespace'))} returns ${bold(`true`)} if all of the characters in a string are whitespace and ${bold('false')} otherwise. ${bold(tagString('is-uppercase'))} and ${bold(tagString('is-lowercase'))} return ${bold(`true`)} if all of the characters in a string are uppercase or lowercase respectively and ${bold('false')} otherwise.`),
+			$newP(`Each pair of code blocks would result in ${bold(`true`)} and then ${bold(`false`)} respectively.`),
+			$newP(`${bold(`is-numeric`)}`),
+			$newPre(`${tagString('is-numeric')}"-10.5"${tagString('/is-numeric')}`),
+			$newPre(`${tagString('is-numeric')}"one"${tagString('/is-numeric')}`),
+			$newP(`${bold(`is-letters`)}`),
+			$newPre(`${tagString('is-letters')}"Hello"${tagString('/is-letters')}`),
+			$newPre(`${tagString('is-letters')}"Hello!"${tagString('/is-letters')}`),
+			$newP(`${bold(`is-alphanumeric`)}`),
+			$newPre(`${tagString('is-alphanumeric')}"caden123"${tagString('/is-alphanumeric')}`),
+			$newPre(`${tagString('is-alphanumeric')}"caden123!"${tagString('/is-alphanumeric')}`),
+			$newP(`${bold(`is-whitespace`)}`),
+			$newPre(`${tagString('is-whitespace')}"\\t\\n "${tagString('/is-whitespace')}`),
+			$newPre(`${tagString('is-whitespace')}"\\t\\n white"${tagString('/is-whitespace')}`),
+			$newP(`${bold(`is-uppercase`)}`),
+			$newPre(`${tagString('is-uppercase')}"CADEN123!"${tagString('/is-uppercase')}`),
+			$newPre(`${tagString('is-uppercase')}"cADEN123!"${tagString('/is-uppercase')}`),
+			$newP(`${bold(`is-lowercase`)}`),
+			$newPre(`${tagString('is-lowercase')}"caden123!"${tagString('/is-lowercase')}`),
+			$newPre(`${tagString('is-lowercase')}"Caden123!"${tagString('/is-lowercase')}`)
 		],
 		[
 			$newP(`A ${bold('number')} is pretty self-explanatory. It can be a number with or without a decimal point, and can be negative. To convert another type into a number one, surround it with opening and closing ${bold(tagString('number'))} tags.`),
@@ -1180,11 +1203,6 @@ $submitButton.addEventListener('click', () => {
 		}
 		return nodeStack;
 	})();
-
-	console.log('Tokens:');
-	tokens.forEach(token => console.log(token));
-	console.log('\nRoot Node:');
-	globalNodes.forEach(token => console.log(token));
 
 	// Run
 	(async () => {
@@ -2267,6 +2285,142 @@ $submitButton.addEventListener('click', () => {
 							return newNode(NodeType.TYPE, value.type);
 						},
 					},
+					{
+						identifier: 'is-numeric',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-numeric' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-numeric' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const number = Number(node.value1);
+							const boolean = (typeof number !== 'undefined' && !isNaN(number));
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'is-letters',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-letters' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-letters' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const boolean = /^[a-zA-Z]+$/.test(string);
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'is-alphanumeric',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-alphanumeric' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-alphanumeric' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const number = Number(string);
+							const boolean = /^[A-Za-z0-9_-]*$/.test(string);
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'is-whitespace',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-whitespace' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-whitespace' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const boolean = /^\s*$/.test(string);
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'is-uppercase',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-uppercase' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-uppercase' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const boolean = string === string.toUpperCase();
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'is-lowercase',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-lowercase' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-lowercase' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const boolean = string === string.toLowerCase();
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
+						identifier: 'to-uppercase',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'to-uppercase' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'to-uppercase' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							return newNode(NodeType.STRING, string.toUpperCase());
+						}
+					},
+					{
+						identifier: 'to-lowercase',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'to-lowercase' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'to-lowercase' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							return newNode(NodeType.STRING, string.toLowerCase());
+						}
+					}
 				]);
 			})();
 			/**
@@ -2305,6 +2459,11 @@ $submitButton.addEventListener('click', () => {
 							return newNode(NodeType.FUNCTION, builtInFunctionFunction(parameter));
 						} else {
 							const functionResult = await callFunction(parameter, scope);
+							if (functionResult) {
+								return functionResult
+							} else {
+								customError(`${parameter.value1} did not return a value.`)
+							}
 							return functionResult;
 						}
 					case NodeType.IDENTIFIER:
