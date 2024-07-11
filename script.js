@@ -843,7 +843,7 @@ function getRandomInt(max) {
 // Event Listeners
 window.addEventListener('load', main);
 $textEditor.addEventListener('keydown', event => {
-	if (event.key == 'Tab') {
+	if (event.key === 'Tab') {
 		let selectedText = '';
 		if (window.getSelection) {	
 			selectedText = window.getSelection().toString();
@@ -857,6 +857,7 @@ $textEditor.addEventListener('keydown', event => {
 				return string.split('').reverse().join('');
 			}
 			let caretStart = $textEditor.selectionStart;
+			let caretEnd = $textEditor.selectionEnd;
 			let start = $textEditor.value.substring(0, caretStart);
 			let reversedStart = reverseString(start);
 			let startLastLineFeedIndex = -1;
@@ -866,7 +867,7 @@ $textEditor.addEventListener('keydown', event => {
 					break;
 				}
 			}
-			let end = $textEditor.value.substring($textEditor.selectionEnd);
+			let end = $textEditor.value.substring(caretEnd);
 			let endLastLineFeedIndex = -1;
 			for (let i = 0; i < end.length; i++) {
 				if (end[i] === '\n') {
@@ -893,11 +894,30 @@ $textEditor.addEventListener('keydown', event => {
 				newMiddle += end;
 			}
 			let newMiddleSplit = newMiddle.split('\n');
-			tabsAdded = newMiddleSplit.length;
-			newMiddle = '\t' + newMiddleSplit.join('\n\t');
+			let firstCaretMovement = 0;
+			let tabsAdded = 0;
+			if (event.shiftKey) {
+				newMiddle = newMiddleSplit.map((line, i) => {
+					if (line[0] === '\t') {
+						if (i == 0) {
+							firstCaretMovement = -1;
+						}
+						tabsAdded--;
+						return line.slice(1);
+					} else {
+						return line;
+					}
+				}).join('\n');
+			} else {
+				firstCaretMovement = 1;
+				tabsAdded = newMiddleSplit.length;
+				newMiddle = '\t' + newMiddleSplit.join('\n\t');
+			}
 			
 			$textEditor.value = newStart + newMiddle + newEnd;
 			$textEditor.selectionStart = $textEditor.selectionEnd = caretStart + selectedText.length + tabsAdded;
+			$textEditor.focus();
+			$textEditor.setSelectionRange(caretStart + firstCaretMovement, caretEnd + tabsAdded);
 		} else {
 			let start = $textEditor.selectionStart;
 			let end = $textEditor.selectionEnd;
