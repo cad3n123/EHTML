@@ -928,6 +928,49 @@ $textEditor.addEventListener('keydown', event => {
 			// put caret at right position again
 			$textEditor.selectionStart = $textEditor.selectionEnd = start + 1;
 		}
+	} else if (event.key === 'Enter') {
+		event.preventDefault();
+		function reverseString(string) {
+			return string.split('').reverse().join('');
+		}
+		let caretStart = $textEditor.selectionStart;
+		let caretEnd = $textEditor.selectionEnd;
+		let start = $textEditor.value.substring(0, caretStart);
+		let reversedStart = reverseString(start);
+		let startLastLineFeedIndex = -1;
+		for (let i = 0; i < reversedStart.length; i++) {
+			if (reversedStart[i] === '\n') {
+				startLastLineFeedIndex = i;
+				break;
+			}
+		}
+		
+		let lastLine = '';
+		if (startLastLineFeedIndex != -1) {
+			startLastLineFeedIndex = start.length - startLastLineFeedIndex
+			lastLine = start.substring(startLastLineFeedIndex, caretStart);
+		} else {
+			lastLine = start.substring(caretStart);
+		}
+		let totalTabs = 0;
+		while (lastLine[totalTabs] === '\t') {
+			totalTabs++;
+		}
+		let textToAdd = '\n';
+		for (let i = 0; i < totalTabs; i++) {
+			textToAdd += '\t';
+		}
+		console.log('start:');
+		console.log($textEditor.value.substring(0, caretStart));
+		console.log('textToAdd:');
+		console.log(textToAdd)
+		console.log('end:');
+		console.log($textEditor.value.substring(caretEnd));
+		const newValue = $textEditor.value.substring(0, caretStart) + textToAdd + $textEditor.value.substring(caretEnd);
+		console.log('newValue:');
+		console.log(newValue);
+		$textEditor.value = newValue;
+		$textEditor.selectionStart = $textEditor.selectionEnd = (caretStart + totalTabs + 1);
 	}
 });
 $submitButton.addEventListener('click', () => {
