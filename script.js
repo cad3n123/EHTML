@@ -1,10 +1,14 @@
 // Global Constants
-const [$main, $help, $textBoxes, $textEditor, $console, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
+const [$main, $help, $textBoxes, $textEditor, $consoleDiv, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console-div', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
 const [$nav] = ['nav'].map(selector => document.querySelector(selector));
 const [$form] = ['form'].map(selector => $main.querySelector(selector));
+const [ $console ] = [ 'textarea' ].map(selector => $consoleDiv.querySelector(selector));
 const loopMax = 2000;
 
 // Global Variables
+let consoleCaretMin = 0;
+let controlKeyDown = false;
+let acceptingInput = false;
 
 // Custom Types/Constructor Functions
 /**
@@ -355,7 +359,19 @@ function main() {
 		],
 		[
 			$newP(`A ${bold('function')} is a set of functions that can be called multiple times and optionally returns up to one value. When a function is created, the creator decides how many parameters it will take in. Later we'll see how to create our own functions.`),
-			$newP(`Calling a function is pretty simple. You've already seen how to call the ${bold('number')} function. This is how you call the ${bold('print')} function.`),$newPre(`${tagString('print')}"Hello, world!${tagString('/print')}`),
+			$newP(`Calling a function is pretty simple. You've already seen how to call the ${bold('number')} function. This is how you call the ${bold('print')} function.`),
+			$newPre(`${tagString('print')}"Hello, world!"${tagString('/print')}`),
+			$newP(`The ${bold('print')} function takes in a string, prints the string, and then automatically prints a new line. To change the end value, a second string can be passed in to replace the new line. This allows you to continue printing on the same line or take input on that line.`),
+			$newP(`The output of this code is "Hello, world!"`),
+			$newPre(`${tagString('print')}
+	"Hello,"
+	""
+${tagString('/print')}
+
+${tagString('print')}
+	" world!"
+	""
+${tagString('/print')}`)
 		],
 		[
 			$newP(`A ${bold('list')} is a group of values- similar to a ${bold('string')} but able to take in any type of value.`),
@@ -839,6 +855,20 @@ ${tagString('/add-to')}`)
 function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }
+function preventConsoleEvent(event) {
+	let caretStart = $console.selectionStart;
+	if (!acceptingInput || caretStart < consoleCaretMin) {
+		if (event.keyCode || event.keyCode == 0) {
+			if (!(controlKeyDown || event.keyCode == 38 || event.keyCode == 40 || event.keyCode == 37 || event.keyCode == 39)) {
+				event.preventDefault();
+				$console.selectionStart = consoleCaretMin;
+			}
+		} else {
+			event.preventDefault();
+			$console.selectionStart = consoleCaretMin;
+		}
+	}
+}
 
 // Event Listeners
 window.addEventListener('load', main);
@@ -960,21 +990,27 @@ $textEditor.addEventListener('keydown', event => {
 		for (let i = 0; i < totalTabs; i++) {
 			textToAdd += '\t';
 		}
-		console.log('start:');
-		console.log($textEditor.value.substring(0, caretStart));
-		console.log('textToAdd:');
-		console.log(textToAdd)
-		console.log('end:');
-		console.log($textEditor.value.substring(caretEnd));
 		const newValue = $textEditor.value.substring(0, caretStart) + textToAdd + $textEditor.value.substring(caretEnd);
-		console.log('newValue:');
-		console.log(newValue);
 		$textEditor.value = newValue;
 		$textEditor.selectionStart = $textEditor.selectionEnd = (caretStart + totalTabs + 1);
 	}
 });
+$console.addEventListener('paste', preventConsoleEvent);
+$console.addEventListener('cut', preventConsoleEvent);
+$console.addEventListener('keydown', (event) => {
+	if (event.keyCode == 17 || event.keyCode == 91) {
+		controlKeyDown = true;
+	}
+	preventConsoleEvent(event);
+})
+$console.addEventListener('keyup', (event) => {
+	if (event.keyCode == 17 || event.keyCode == 91) {
+		controlKeyDown = false;
+	}
+})
 $submitButton.addEventListener('click', () => {
 	let errorOccured = false;
+	consoleCaretMin = 0;
 	/**
 	 *
 	 * @param {string} string
@@ -990,13 +1026,9 @@ $submitButton.addEventListener('click', () => {
 	 */
 	function addToConsole(text) {
 		if (!errorOccured) {
-			const $line = newConsoleLine();
-			const $text = document.createElement('pre');
-			$text.innerHTML = text;
-			$line.appendChild(newCarrot());
-			$line.appendChild($text);
-			$console.appendChild($line);
+			$console.value += text;
 			$console.scrollTop = $console.scrollHeight;
+			consoleCaretMin += text.length;
 		}
 	}
 	/**
@@ -1007,29 +1039,23 @@ $submitButton.addEventListener('click', () => {
 		if (errorOccured) {
 			return '';
 		}
-		const $line = newConsoleLine();
-		$line.classList.add('input');
-		const $textarea = document.createElement('textarea');
-		$line.appendChild(newCarrot());
-		$line.appendChild($textarea);
-		$console.appendChild($line);
+		$console.focus();
+		$console.selectionStart = consoleCaretMin;
+		acceptingInput = true;
 		$console.scrollTop = $console.scrollHeight;
 
 		const promise = new Promise(resolve => {
-			$textarea.addEventListener('keydown', event => {
-				if (event.key == 'Enter') {
-					const text = $textarea.value;
-					const $text = document.createElement('pre');
-					$text.innerHTML = text;
-					$line.appendChild($text);
-					$textarea.remove();
-					$line.classList.remove('input');
+			$console.onkeydown = event => {
+				if (acceptingInput && event.key == 'Enter') {
+					event.preventDefault();
+					const text = $console.value.substring(consoleCaretMin);
+					consoleCaretMin += text.length;
 					$console.scrollTop = $console.scrollHeight;
+					acceptingInput = false;
 					resolve(text);
 				}
-			});
+			};
 		});
-
 		return promise;
 	}
 
@@ -1288,7 +1314,7 @@ $submitButton.addEventListener('click', () => {
 	// Run
 	(async () => {
 		if (!errorOccured) {
-			$console.innerHTML = '';
+			$console.value = '';
 		}
 		/**
 		 * @typedef {Object} Variable
@@ -1546,19 +1572,13 @@ $submitButton.addEventListener('click', () => {
 					{
 						identifier: 'print',
 						run: async parameters => {
-							if (parameters.length != 1) {
-								customError(`'print' expects 1 parameter but received ${parameters.length}.`);
+							if (parameters.length < 1 || parameters.length > 2) {
+								customError(`'print' expects 1 or 2 parameter but received ${parameters.length}.`);
 								return;
 							}
-							const parameter = builtInToString(
-								await getParameterValue(parameters[0], scope)
-							);
-							if (parameter.type == NodeType.STRING) {
-								addToConsole(parameter.value1);
-								return;
-							}
-							customError(`'print' expects a string but was given a ${NodeTypeString[parameter.type]}.`
-							);
+							const parameter1 = builtInToString(await getParameterValue(parameters[0], scope));
+							const parameter2 = parameters.length > 1 ? builtInToString(await getParameterValue(parameters[1], scope)) : undefined;
+							addToConsole(parameter1.value1 + (parameter2 ? parameter2.value1 : '\n'));
 						},
 					},
 					{
@@ -1568,7 +1588,8 @@ $submitButton.addEventListener('click', () => {
 								customError(`'input' expects 0 parameters but received ${parameters.length}.`);
 								return;
 							}
-							const input = await getConsoleInput();
+							const inputPromise = getConsoleInput();
+							const input = await inputPromise;
 							return newNode(NodeType.STRING, input);
 						},
 					},
