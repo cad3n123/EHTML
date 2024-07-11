@@ -200,7 +200,23 @@ function main() {
 	 */
 	function $newPre(string) {
 		const $pre = $('pre');
-		$pre.innerHTML = string;
+		const $span = $('span');
+		$span.innerHTML = string;
+		const $copy = (() => {
+			const $div = document.createElement('div');
+			const $i = document.createElement('i');
+			
+			$i.classList.add('fa-solid', 'fa-copy', 'fa-large');
+			$i.addEventListener('click', () => {
+				navigator.clipboard.writeText($span.childNodes[0].nodeValue);
+			});
+			$div.appendChild($i);
+			return $div;
+		})();
+		$pre.appendChild($copy);
+		$pre.appendChild($span);
+		
+		
 		return $pre;
 	}
 	/** @typedef {Array.<HTMLParagraphElement|CodeBlock>} Group */
@@ -267,11 +283,14 @@ function main() {
 			$newP(`The ${bold(tagString('to-uppercase'))} and ${bold(tagString('to-lowercase'))} functions can be used to convert all of the characters in a string that are letters to uppercase or lowercase. The next two code blocks would result in "CADEN123!" and then "caden123!" respectively.`),
 			$newPre(`${tagString('to-uppercase')}"cAdEn123!"${tagString('/to-uppercase')}`),
 			$newPre(`${tagString('to-lowercase')}"cAdEn123!"${tagString('/to-lowercase')}`),
-			$newP(`There are a few functions that test the value of a string. ${bold(tagString('is-numeric'))} returns ${bold('true')} if the string can be converted to a ${bold('number')} and returns ${bold('false')} otherwise. ${bold(tagString('is-letters'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet and ${bold('false')} otherwise. ${bold(tagString('is-alphanumeric'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet or are a number. Otherwise, it returns ${bold('false')}. ${bold(tagString('is-whitespace'))} returns ${bold(`true`)} if all of the characters in a string are whitespace and ${bold('false')} otherwise. ${bold(tagString('is-uppercase'))} and ${bold(tagString('is-lowercase'))} return ${bold(`true`)} if all of the characters in a string are uppercase or lowercase respectively and ${bold('false')} otherwise.`),
+			$newP(`There are a few functions that test the value of a string. ${bold(tagString('is-number'))} returns ${bold('true')} if the string can be converted to a ${bold('number')} and returns ${bold('false')} otherwise. ${bold(tagString('is-numeric'))} returns ${bold('true')} if all of the characters in the string are numbers and returns ${bold('false')} otherwise. ${bold(tagString('is-letters'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet and ${bold('false')} otherwise. ${bold(tagString('is-alphanumeric'))} returns ${bold(`true`)} if all of the characters in a string are in the alphabet or are a number. Otherwise, it returns ${bold('false')}. ${bold(tagString('is-whitespace'))} returns ${bold(`true`)} if all of the characters in a string are whitespace and ${bold('false')} otherwise. ${bold(tagString('is-uppercase'))} and ${bold(tagString('is-lowercase'))} return ${bold(`true`)} if all of the characters in a string are uppercase or lowercase respectively and ${bold('false')} otherwise.`),
 			$newP(`Each pair of code blocks would result in ${bold(`true`)} and then ${bold(`false`)} respectively.`),
+			$newP(`${bold(`is-number`)}`),
+			$newPre(`${tagString('is-number')}"-10.5"${tagString('/is-number')}`),
+			$newPre(`${tagString('is-number')}"one"${tagString('/is-number')}`),
 			$newP(`${bold(`is-numeric`)}`),
-			$newPre(`${tagString('is-numeric')}"-10.5"${tagString('/is-numeric')}`),
-			$newPre(`${tagString('is-numeric')}"one"${tagString('/is-numeric')}`),
+			$newPre(`${tagString('is-numeric')}"10"${tagString('/is-numeric')}`),
+			$newPre(`${tagString('is-numeric')}"10.5"${tagString('/is-numeric')}`),
 			$newP(`${bold(`is-letters`)}`),
 			$newPre(`${tagString('is-letters')}"Hello"${tagString('/is-letters')}`),
 			$newPre(`${tagString('is-letters')}"Hello!"${tagString('/is-letters')}`),
@@ -607,8 +626,7 @@ ${tagString('/print')}`),
 	]);
 	newInfoValue('If Statements', [
 		[
-			$newP(`Now that you can receive user input, the next thing you'll probably want to incorporate in your programs is branching. The ${bold(tagString('if'))} function takes in a ${bold('boolean')} and a ${bold('function')}. The ${bold('function')} will only run if the ${bold('boolean')} is ${bold('true')}.`),
-			$newP(`Similarly, the ${bold(tagString('if-else'))} function takes in a ${bold('boolean')} and two ${bold('functions')}. The first ${bold('function')} will run if the ${bold('boolean')} is ${bold('true')}. If the ${bold('boolean')} is ${bold('false')}, the second ${bold('function')} will run.`),
+			$newP(`Now that you can receive user input, the next thing you'll probably want to incorporate in your programs is branching. The ${bold(tagString('if'))} function takes in a ${bold('boolean')} and one to two ${bold('functions')}. The first ${bold('function')} will only run if the ${bold('boolean')} is ${bold('true')}. If a second ${bold('function')} is passed through and the ${bold('boolean')} is ${bold('false')}, that second ${bold('function')} will run.`),
 			$newP(`The first example will ask the user for their age and tell them ${bold('if')} they are not old enough to drink alcohol (at least in the US).`),
 			$newPre(`${tagString('print')}"How old are you?"${tagString('/print')}
 
@@ -629,7 +647,7 @@ ${tagString('if')}
 		${tagString('print')}"You are not old enough to drink alcohol"${tagString('/print')}
 	${tagString('/function')}
 ${tagString('/if')}`),
-			$newP(`The next example uses the ${bold('if-else')} function to additionally tell them that they are old enough to drink alcohol if they are at least 21.`),
+			$newP(`The next example passes in a second ${bold('functions')} to additionally tell them that they are old enough to drink alcohol if they are at least 21.`),
 			$newPre(`${tagString('print')}"How old are you?"${tagString('/print')}
 
 ${tagString('set')}
@@ -639,7 +657,7 @@ ${tagString('set')}
 	${tagString('/number')}
 ${tagString('/set')}
 
-${tagString('if-else')}
+${tagString('if')}
 	${tagString('less')}
 		${tagString('age')}
 		21
@@ -652,7 +670,7 @@ ${tagString('if-else')}
 	${tagString('function')}
 		${tagString('print')}"You are old enough to drink alcohol"${tagString('/print')}
 	${tagString('/function')}
-${tagString('/if-else')}`),
+${tagString('/if')}`),
 		],
 		[
 			$newP(`Note. You can instead pass in variables that hold a function when the ${bold('function')} function is called.`)
@@ -1871,8 +1889,8 @@ $submitButton.addEventListener('click', () => {
 					{
 						identifier: 'if',
 						run: async parameters => {
-							if (parameters.length != 2) {
-								customError(`'if' expects 2 parameters but received ${parameters.length}.`);
+							if (parameters.length < 2 || parameters.length > 3) {
+								customError(`'if' expects 2 or 3 parameter but received ${parameters.length}.`);
 								return;
 							}
 							const parameter1 = await getParameterValue(parameters[0], scope);
@@ -1880,50 +1898,12 @@ $submitButton.addEventListener('click', () => {
 								customError(`The first value of 'if' should be a boolean.`);
 								return;
 							}
-							if (parameter1.value1) {
-								/** @type {MyFunction} */
-								const functionToRun = await (async () => {
-									const parameterToRun = parameters[1];
-									if (parameterToRun.type == NodeType.FUNCTION_CALL) {
-										if (parameterToRun.value1 === 'function') {
-											return builtInFunctionFunction(parameterToRun);
-										} else {
-											const parameterValue = await getParameterValue(parameterToRun, scope);
-											if (parameterValue.type == NodeType.FUNCTION) {
-												return parameterValue.value1;
-											} else {
-												customError(`The second value of 'if' should be type function.`);
-											}
-										}
-									} else {
-										const parameterValue = await getParameterValue(parameterToRun, scope);
-										if (parameterValue.type == NodeType.FUNCTION) {
-											return parameterValue.value1;
-										} else {
-											customError(`The second value of 'if' should be type function.`);
-										}
-									}
-								})();
-
-								await runFunction(newFunction(functionToRun.statementNodes, newScope(scope)));
-							}
-						},
-					},
-					{
-						identifier: 'if-else',
-						run: async parameters => {
-							if (parameters.length != 3) {
-								customError(`'if-else' expects 3 parameter but received ${parameters.length}.`);
-								return;
-							}
-							const parameter1 = await getParameterValue(parameters[0], scope);
-							if (parameter1.type != NodeType.BOOLEAN) {
-								customError(`The first value of 'if-else' should be a boolean.`);
-								return;
-							}
 							/** @type {MyFunction} */
 							const functionToRun = await (async () => {
 								const parameterToRun = parameter1.value1 ? parameters[1] : parameters[2];
+								if (!parameterToRun) {
+									return;
+								}
 								if (parameterToRun.type == NodeType.FUNCTION_CALL) {
 									if (parameterToRun.value1 === 'function') {
 										return builtInFunctionFunction(parameterToRun);
@@ -1932,7 +1912,7 @@ $submitButton.addEventListener('click', () => {
 										if (parameterValue.type == NodeType.FUNCTION) {
 											return parameterValue.value1;
 										} else {
-											customError(`The second and third value of 'if-else' should be type function.`);
+											customError(`The ${parameter1.value1 ? 'second' : 'third'} value of 'if' should be type function.`);
 										}
 									}
 								} else {
@@ -1940,12 +1920,14 @@ $submitButton.addEventListener('click', () => {
 									if (parameterValue.type == NodeType.FUNCTION) {
 										return parameterValue.value1;
 									} else {
-										customError(`The second and third value of 'if-else' should be type function.`);
+										customError(`The ${parameter1.value1 ? 'second' : 'third'} value of 'if' should be type function.`);
 									}
 								}
 							})();
 
-							await runFunction(newFunction(functionToRun.statementNodes, newScope(scope)));
+							if (functionToRun) {
+								await runFunction(newFunction(functionToRun.statementNodes, newScope(scope)));
+							}
 						},
 					},
 					{
@@ -2286,6 +2268,24 @@ $submitButton.addEventListener('click', () => {
 						},
 					},
 					{
+						identifier: 'is-number',
+						run: async parameters => {
+							if (parameters.length != 1) {
+								customError(`'is-number' expects 1 parameter but received ${parameters.length}.`);
+								return;
+							}
+							const node = await getParameterValue(parameters[0], scope);
+							if (node.type != NodeType.STRING) {
+								customError(`'is-number' expects a string.`)
+								return
+							}
+							const string = node.value1;
+							const number = Number(node.value1);
+							const boolean = (typeof number !== 'undefined' && !isNaN(number));
+							return newNode(NodeType.BOOLEAN, boolean);
+						}
+					},
+					{
 						identifier: 'is-numeric',
 						run: async parameters => {
 							if (parameters.length != 1) {
@@ -2298,8 +2298,7 @@ $submitButton.addEventListener('click', () => {
 								return
 							}
 							const string = node.value1;
-							const number = Number(node.value1);
-							const boolean = (typeof number !== 'undefined' && !isNaN(number));
+							const boolean = /^[0-9]*$/.test(string);
 							return newNode(NodeType.BOOLEAN, boolean);
 						}
 					},
@@ -2334,7 +2333,7 @@ $submitButton.addEventListener('click', () => {
 							}
 							const string = node.value1;
 							const number = Number(string);
-							const boolean = /^[A-Za-z0-9_-]*$/.test(string);
+							const boolean = /^[A-Za-z0-9]*$/.test(string);
 							return newNode(NodeType.BOOLEAN, boolean);
 						}
 					},
