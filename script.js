@@ -1,8 +1,7 @@
 // Global Constants
-const [$main, $help, $textBoxes, $textEditor, $consoleDiv, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console-div', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
+const [$main, $help, $textBoxes, $textEditor, $console, $infoSideBar, $submitButton] = [ 'main', 'help', 'text-boxes', 'text-editor', 'console', 'info-side-bar', 'submit-button' ].map(id => document.getElementById(id));
 const [$nav] = ['nav'].map(selector => document.querySelector(selector));
 const [$form] = ['form'].map(selector => $main.querySelector(selector));
-const [ $console ] = [ 'textarea' ].map(selector => $consoleDiv.querySelector(selector));
 const loopMax = 2000;
 
 // Global Variables

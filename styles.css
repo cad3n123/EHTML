@@ -155,10 +155,11 @@ body {
 				font-size: large;
 				padding: 0.5rem;
 				padding-bottom: 10rem;
-				outline: none;
-				resize: none;
+				background-color: white;
+				color: black;
+				scrollbar-color: darkgrey white;
 			}
-			#console-div {
+			textarea {
 				scrollbar-color: grey black;
 				box-sizing: border-box;
 				width: 100%;
@@ -168,54 +169,9 @@ body {
 				color: white;
 				background-color: black;
 				overflow-y: scroll;
-				display: flex;
-				flex-direction: column;
-
-				textarea {
-					resize: none;
-					font-family: unset;
-					font-size: 15.6px;
-					box-sizing: border-box;
-					height: 100%;
-					width: 100%;
-					padding: 0;
-					background-color: black;
-					color: white;
-					border-style: none;
-					outline: none;
-				}
-				.line {
-					display: flex;
-
-					* {
-						display: inline-block;
-						margin: 0 1rem 0 0;
-					}
-					textarea {
-						resize: none;
-						font-family: unset;
-						font-size: 15.6px;
-						box-sizing: border-box;
-						height: 100%;
-						width: 100%;
-						padding: 0;
-						background-color: black;
-						color: white;
-						border-style: none;
-						outline: none;
-					}
-					p {
-						min-width: 0.5rem;
-					}
-					pre {
-						font-family: unset;
-						word-wrap: break-word;
-					}
-				}
-				.line.input {
-					height: 100%;
-				}
-			}
+				outline: none;
+				resize: none;
+			}	
 		}
 	}
 	#help {
