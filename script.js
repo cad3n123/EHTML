@@ -18,6 +18,7 @@ const TokenType = {
 	LITERAL: 1,
 	TYPE: 2
 };
+const TokenTypeString = [ 'ELEMENT', 'LITERAL', 'TYPE' ];
 /**
  * @typedef {number} TokenSubType
  */
@@ -398,7 +399,7 @@ ${tagString('/list')}`),
 			$newP(`The ${bold(tagString('slice'))} function takes in a beginning index and an optional end index. The function returns a new ${bold('list')} or ${bold('string')} containing the values from the beginning index to the end index. If the end index is excluded, it will just get all the values from the beginning index to the end.`),
 		],
 		[
-			$newP(`The ${bold(tagString('type-of'))} function takes in a value and returns its ${bold('type')}.`),
+			$newP(`The ${bold(tagString('type-of'))} function takes in a value and returns its ${bold('type')}. Types can also be directly made by typing ${bold('String')}, ${bold('Number')}, ${bold('Boolean')}, ${bold('List')}, ${bold('Function')}, and ${bold('Type')}.`),
 			$newP(`This would return ${bold('String')}:`),
 			$newPre(`${tagString('type-of')}"Hello, world!"${tagString('/type-of')}`),
 			$newP(`This would return ${bold('Number')}:`),
@@ -559,7 +560,7 @@ ${tagString('/set')}
 
 ${tagString('equal')}
 	${tagString('type-of')}${tagString('x')}${tagString('/type-of')}
-    ${tagString('type-of')}5${tagString('/type-of')}
+    Number
 ${tagString('/equal')}`),
 		],
 		[
@@ -1153,8 +1154,12 @@ $submitButton.addEventListener('click', () => {
 					tokens.push(newToken(decodeURIComponent(JSON.parse('"' + word.replace('"', '\\"') + '"')), TokenType.LITERAL, TokenSubType.STRING));
 				}
 			} else {
-				while (isRoom() && !(peekIs('<') || /\s/g.test(peek()))) {
+				while (isRoom() && !(peekIs('<') || peekIs('/') || /\s/g.test(peek()))) {
 					word += consume();
+				}
+				if (isRoom() && (peekIs('/'))) {
+					customError(`Unexpected character "${peek()}" in literal "${word}".`);
+					return;
 				}
 				let thisNewToken;
 				if (word === 'true' || word === 'false') {
@@ -1279,25 +1284,10 @@ $submitButton.addEventListener('click', () => {
 						const nextElement = nodeStack.pop();
 						if (nextElement.type == NodeType.TOKEN) {
 							const nextElementToken = /** @type {Token} */ (nextElement.value1);
-							if (nextElementToken.type == TokenType.ELEMENT) {
-								parameters.push(newNode(NodeType.IDENTIFIER, nextElementToken.value));
-							} else {
-								let thisNewNode;
-								switch (nextElementToken.subType) {
-									case TokenSubType.STRING:
-										thisNewNode = newNode(NodeType.STRING, nextElementToken.value);
-										break;
-									case TokenSubType.NUMBER:
-										thisNewNode = newNode(NodeType.NUMBER, nextElementToken.value);
-										break;
-									case TokenSubType.BOOLEAN:
-										thisNewNode = newNode(NodeType.BOOLEAN, nextElementToken.value);
-										break;
-									default:
-										break;
-								}
-								parameters.push(thisNewNode);
+							if (nextElementToken.type != TokenType.ELEMENT) {
+								console.error('This should never happen!');
 							}
+							parameters.push(newNode(NodeType.IDENTIFIER, nextElementToken.value));
 						} else {
 							parameters.push(nextElement);
 						}
@@ -1306,8 +1296,8 @@ $submitButton.addEventListener('click', () => {
 					nodeStack.push(newNode(NodeType.FUNCTION_CALL, nodeStack.pop().value1.value, parameters));
 					consume();
 				}
-			} else {
-				const nextLiteral = peek();
+			} else if (peekIsType(TokenType.LITERAL)) {
+				const nextLiteral = consume();
 				let nodeType;
 				switch (nextLiteral.subType) {
 					case TokenSubType.STRING:
@@ -1320,7 +1310,31 @@ $submitButton.addEventListener('click', () => {
 						nodeType = NodeType.BOOLEAN;
 						break;
 				}
-				nodeStack.push(newNode(nodeType, consume().value));
+				nodeStack.push(newNode(nodeType, nextLiteral.value));
+			} else {
+				const typeToken = consume();
+				let nodeValue;
+				switch (typeToken.subType) {
+					case TokenSubType.STRING:
+						nodeValue = NodeType.STRING;
+						break;
+					case TokenSubType.NUMBER:
+						nodeValue = NodeType.NUMBER;
+						break;
+					case TokenSubType.BOOLEAN:
+						nodeValue = NodeType.BOOLEAN;
+						break;
+					case TokenSubType.FUNCTION:
+						nodeValue = NodeType.FUNCTION;
+						break;
+					case TokenSubType.LIST:
+						nodeValue = NodeType.LIST;
+						break;
+					case TokenSubType.TYPE:
+						nodeValue = NodeType.TYPE;
+						break;
+				}
+				nodeStack.push(newNode(NodeType.TYPE, nodeValue));
 			}
 		}
 		return nodeStack;
@@ -2079,7 +2093,6 @@ $submitButton.addEventListener('click', () => {
 							switch (parameter.type) {
 								case NodeType.LIST:
 								case NodeType.STRING:
-								case NodeType.TOKEN:
 									return newNode(NodeType.NUMBER, parameter.value1.length);
 								default:
 									customError(`'length' expects a string or a list, but was given a ${NodeTypeString[parameter.value1.type]}.`);
@@ -2358,7 +2371,7 @@ $submitButton.addEventListener('click', () => {
 					{
 						identifier: 'type-of',
 						run: async parameters => {
-							if (parameters.length > 1) {
+							if (parameters.length > 1 || parameters.length == 0) {
 								customError(`'type-of' expects 1 parameter but received ${parameters.length}.`);
 								return;
 							}
@@ -2583,6 +2596,7 @@ $submitButton.addEventListener('click', () => {
 					case NodeType.NUMBER:
 					case NodeType.BOOLEAN:
 					case NodeType.LIST:
+					case NodeType.TYPE:
 						return parameter;
 					default:
 						customError(`Error: Unknown parameter ${parameter.value1}.`);
