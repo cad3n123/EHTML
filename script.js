@@ -15,7 +15,8 @@ let acceptingInput = false;
  */
 const TokenType = {
 	ELEMENT: 0,
-	LITERAL: 1
+	LITERAL: 1,
+	TYPE: 2
 };
 /**
  * @typedef {number} TokenSubType
@@ -26,7 +27,10 @@ const TokenSubType = {
 	END: 2,
 	STRING: 3,
 	NUMBER: 4,
-	BOOLEAN: 5
+	BOOLEAN: 5,
+	FUNCTION: 6,
+	LIST: 7,
+	TYPE: 8
 };
 /**
  * @typedef {Object} Token
@@ -1155,6 +1159,18 @@ $submitButton.addEventListener('click', () => {
 				let thisNewToken;
 				if (word === 'true' || word === 'false') {
 					thisNewToken = newToken(word === 'true' ? true : false, TokenType.LITERAL, TokenSubType.BOOLEAN);
+				} else if (word === 'String') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.STRING);
+				} else if (word === 'Number') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.NUMBER);
+				} else if (word === 'Boolean') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.BOOLEAN);
+				} else if (word === 'Function') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.FUNCTION);
+				} else if (word === 'List') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.LIST);
+				} else if (word === 'Type') {
+					thisNewToken = newToken(word, TokenType.TYPE, TokenSubType.TYPE);
 				} else {
 					let newValue = Number(word);
 					if (newValue || newValue == 0) {
