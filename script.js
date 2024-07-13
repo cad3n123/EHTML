@@ -113,21 +113,6 @@ function newNode(nodeType, value1, value2) {
 		value2: value2,
 	};
 }
-/**
- *
- * @returns {HTMLParagraphElement}
- */
-function newCarrot() {
-	const p = document.createElement('p');
-	p.class = 'carrot';
-	p.innerHTML = '>';
-	return p;
-}
-function newConsoleLine() {
-	const $div = document.createElement('div');
-	$div.classList.add('line');
-	return $div;
-}
 
 // Functions
 function main() {
@@ -1002,13 +987,13 @@ $textEditor.addEventListener('keydown', event => {
 $console.addEventListener('paste', preventConsoleEvent);
 $console.addEventListener('cut', preventConsoleEvent);
 $console.addEventListener('keydown', (event) => {
-	if (event.keyCode == 17 || event.keyCode == 91) {
+	if (event.key === 'Control' || event.metaKey) {
 		controlKeyDown = true;
 	}
 	preventConsoleEvent(event);
 })
 $console.addEventListener('keyup', (event) => {
-	if (event.keyCode == 17 || event.keyCode == 91) {
+	if (event.key === 'Control' || event.metaKey) {
 		controlKeyDown = false;
 	}
 })
@@ -1030,9 +1015,11 @@ $submitButton.addEventListener('click', () => {
 	 */
 	function addToConsole(text) {
 		if (!errorOccured) {
-			$console.value += text;
-			$console.scrollTop = $console.scrollHeight;
-			consoleCaretMin += text.length;
+			setTimeout(() => {
+				$console.value += text;
+				$console.scrollTop = $console.scrollHeight;
+				consoleCaretMin += text.length;
+			}, 0);
 		}
 	}
 	/**
